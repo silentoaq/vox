@@ -1,0 +1,1346 @@
+[
+ {
+  "id": "system",
+  "style": "system",
+  "weights": [
+   "400",
+   "700"
+  ]
+ },
+ {
+  "id": "chiron-hei",
+  "label": "昭源黑體",
+  "style": "sans",
+  "family": "\"Chiron Hei HK\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700"
+  ],
+  "gfont": "Chiron+Hei+HK"
+ },
+ {
+  "id": "chocolate-sans",
+  "label": "朱古力黑體",
+  "style": "sans",
+  "family": "\"Chocolate Classical Sans\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Chocolate+Classical+Sans"
+ },
+ {
+  "id": "huninn",
+  "label": "jf open 粉圓",
+  "style": "round",
+  "family": "\"Huninn\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Huninn"
+ },
+ {
+  "id": "chiron-goround",
+  "label": "昭源環方",
+  "style": "round",
+  "family": "\"Chiron GoRound TC\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700"
+  ],
+  "gfont": "Chiron+GoRound+TC"
+ },
+ {
+  "id": "lubrifont",
+  "label": "WDXL Lubrifont 圓頭黑",
+  "style": "round",
+  "family": "\"WDXL Lubrifont TC\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "WDXL+Lubrifont+TC"
+ },
+ {
+  "id": "chiron-sung",
+  "label": "昭源宋體",
+  "style": "serif",
+  "family": "\"Chiron Sung HK\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700"
+  ],
+  "gfont": "Chiron+Sung+HK"
+ },
+ {
+  "id": "cactus-serif",
+  "label": "仙人掌明體",
+  "style": "serif",
+  "family": "\"Cactus Classical Serif\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Cactus+Classical+Serif"
+ },
+ {
+  "id": "uoqmunthenkhung",
+  "label": "UoqMunThenKhung 粗明體",
+  "style": "serif",
+  "family": "\"UoqMunThenKhung\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "UoqMunThenKhung"
+ },
+ {
+  "id": "kinghwa-oldsong",
+  "label": "京華老宋體",
+  "style": "serif",
+  "family": "\"KingHwa_OldSong\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/jhlst@3.0.0/dist/京華老宋体v1_007/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/KonghaYao/chinese-free-web-font-storage/6ba8b01e2415e6dd7cd6f67890806ed23175a31b/packages/jhlst/fonts/%E4%BA%AC%E8%8F%AF%E8%80%81%E5%AE%8B%E4%BD%93v2.002.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "qiji",
+  "label": "齊伋體",
+  "style": "serif",
+  "family": "\"QIJIFALLBACK\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/hldqjt@3.0.0/dist/qiji-fallback/result.css",
+  "files": {
+   "400": "https://github.com/LingDong-/qiji-font/releases/download/0.0.4/qiji-fallback.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "huiwen-mincho",
+  "label": "匯文明朝體",
+  "style": "serif",
+  "family": "\"Huiwen-mincho\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/hwmct@3.0.0/dist/汇文明朝体/result.css",
+  "files": {
+   "400": "https://github.com/bosswnx/huiwenmincho-improved/releases/download/20241203/Huiwenmincho-improved.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "wenkai",
+  "label": "霞鶩文楷 TC",
+  "style": "kai",
+  "family": "\"LXGW WenKai TC\"",
+  "weights": [
+   "300",
+   "400",
+   "700"
+  ],
+  "gfont": "LXGW+WenKai+TC"
+ },
+ {
+  "id": "iansui",
+  "label": "芫荽",
+  "style": "hand",
+  "family": "\"Iansui\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Iansui"
+ },
+ {
+  "id": "lxgw-marker",
+  "label": "霞鶩漫黑",
+  "style": "hand",
+  "family": "\"LXGW Marker Gothic\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "LXGW+Marker+Gothic"
+ },
+ {
+  "id": "xiaolai",
+  "label": "小賴體",
+  "style": "hand",
+  "family": "\"Xiaolai SC\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/xiaolai@3.0.0/dist/Xiaolai/result.css",
+  "files": {
+   "400": "https://github.com/lxgw/kose-font/releases/download/v3.126/Xiaolai-Regular.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "yozai",
+  "label": "悠哉",
+  "style": "hand",
+  "family": "\"Yozai\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/yozai@3.0.0/dist/Yozai-Regular/result.css",
+  "files": {
+   "400": "https://github.com/lxgw/yozai-font/releases/download/v0.868/Yozai-Regular.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "jason-handwriting",
+  "label": "清松手寫體 3",
+  "style": "hand",
+  "family": "\"JasonHandwriting3\"",
+  "weights": [
+   "400"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/jasonhandwriting/JasonHandwriting@master/JasonHandwriting3.ttf"
+  },
+  "files": {
+   "400": "https://cdn.jsdelivr.net/gh/jasonhandwriting/JasonHandwriting@master/JasonHandwriting3.ttf"
+  }
+ },
+ {
+  "id": "chenyu-luoyan",
+  "label": "辰宇落雁體",
+  "style": "hand",
+  "family": "\"ChenYuluoyan Thin\"",
+  "weights": [
+   "400"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/Chenyu-otf/chenyuluoyan_thin@master/ChenYuluoyan-2.0-Thin.ttf"
+  },
+  "files": {
+   "400": "https://github.com/Chenyu-otf/chenyuluoyan_thin/releases/download/v2.0/ChenYuluoyan-2.0-Thin.ttf"
+  }
+ },
+ {
+  "id": "ingaan",
+  "label": "一點顏",
+  "style": "brush",
+  "family": "\"I.Ngaan\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/yidianyan@3.0.0/dist/yidianyan/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/KonghaYao/chinese-free-web-font-storage/6ba8b01e2415e6dd7cd6f67890806ed23175a31b/packages/yidianyan/fonts/yidianyan.ttf"
+  }
+ },
+ {
+  "id": "yuji-boku",
+  "label": "Yuji Boku",
+  "style": "brush",
+  "family": "\"Yuji Boku\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Yuji+Boku"
+ },
+ {
+  "id": "reggae-one",
+  "label": "Reggae One",
+  "style": "display",
+  "family": "\"Reggae One\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Reggae+One"
+ },
+ {
+  "id": "cubic11",
+  "label": "俐方體 11 號",
+  "style": "pixel",
+  "family": "\"Cubic 11\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/cubic@3.0.0/dist/Cubic/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/ACh-K/Cubic-11/v1.500/fonts/ttf/Cubic_11.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "boutique-bitmap",
+  "label": "精品點陣體",
+  "style": "pixel",
+  "family": "\"BoutiqueBitmap9x9 1.6 R\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/jpdzt@3.0.0/dist/BoutiqueBitmap9x9_1_6/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/scott0107000/BoutiqueBitmap9x9/0f343adff9fbc63267d8bcdf2bb5dd32b4d7b701/BoutiqueBitmap9x9_1.93.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "quan-pixel",
+  "label": "全小素",
+  "style": "pixel",
+  "family": "\"QuanPixel 8px\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/qxs@3.0.0/dist/quan/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/KonghaYao/chinese-free-web-font-storage/6ba8b01e2415e6dd7cd6f67890806ed23175a31b/packages/qxs/fonts/quan.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "cef-mono",
+  "label": "CEF 等寬",
+  "style": "other",
+  "family": "\"CEF Fonts CJK Mono\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/cef@3.0.0/dist/CEFFontsCJKMono-Regular/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/Partyb0ssishere/cef-fonts-cjk/f6377c860fad7a466cfd9273649a797ae7a0272d/CEFFontsCJKMono-Regular.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "stick",
+  "label": "Stick",
+  "style": "other",
+  "family": "\"Stick\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Stick"
+ },
+ {
+  "id": "genyo-gothic-tw",
+  "label": "源樣黑體",
+  "style": "sans",
+  "family": "\"GenYoGothic2 TW\"",
+  "weights": [
+   "400",
+   "500",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyog-font@v2.100/otf/TW/GenYoGothic2TW-R.otf",
+   "500": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyog-font@v2.100/otf/TW/GenYoGothic2TW-M.otf",
+   "700": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyog-font@v2.100/otf/TW/GenYoGothic2TW-B.otf",
+   "900": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyog-font@v2.100/otf/TW/GenYoGothic2TW-H.otf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/genyog-font/v2.100/otf/TW/GenYoGothic2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/genyog-font/v2.100/otf/TW/GenYoGothic2TW-M.otf",
+   "700": "https://raw.githubusercontent.com/ButTaiwan/genyog-font/v2.100/otf/TW/GenYoGothic2TW-B.otf",
+   "900": "https://raw.githubusercontent.com/ButTaiwan/genyog-font/v2.100/otf/TW/GenYoGothic2TW-H.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "genyo-min-tw",
+  "label": "源樣明體",
+  "style": "serif",
+  "family": "\"GenYoMin2 TW\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyo-font@v2.100/otf/TW/GenYoMin2TW-R.otf",
+   "500": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyo-font@v2.100/otf/TW/GenYoMin2TW-M.otf",
+   "600": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyo-font@v2.100/otf/TW/GenYoMin2TW-SB.otf",
+   "700": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyo-font@v2.100/otf/TW/GenYoMin2TW-B.otf",
+   "900": "https://cdn.jsdelivr.net/gh/ButTaiwan/genyo-font@v2.100/otf/TW/GenYoMin2TW-H.otf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/genyo-font/v2.100/otf/TW/GenYoMin2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/genyo-font/v2.100/otf/TW/GenYoMin2TW-M.otf",
+   "600": "https://raw.githubusercontent.com/ButTaiwan/genyo-font/v2.100/otf/TW/GenYoMin2TW-SB.otf",
+   "700": "https://raw.githubusercontent.com/ButTaiwan/genyo-font/v2.100/otf/TW/GenYoMin2TW-B.otf",
+   "900": "https://raw.githubusercontent.com/ButTaiwan/genyo-font/v2.100/otf/TW/GenYoMin2TW-H.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "gensen-rounded-tw",
+  "label": "源泉圓體",
+  "style": "round",
+  "family": "\"GenSenRounded2 TW\"",
+  "weights": [
+   "400",
+   "500",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/ButTaiwan/gensen-font@v2.100/otf/TW/GenSenRounded2TW-R.otf",
+   "500": "https://cdn.jsdelivr.net/gh/ButTaiwan/gensen-font@v2.100/otf/TW/GenSenRounded2TW-M.otf",
+   "700": "https://cdn.jsdelivr.net/gh/ButTaiwan/gensen-font@v2.100/otf/TW/GenSenRounded2TW-B.otf",
+   "900": "https://cdn.jsdelivr.net/gh/ButTaiwan/gensen-font@v2.100/otf/TW/GenSenRounded2TW-H.otf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/gensen-font/v2.100/otf/TW/GenSenRounded2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/gensen-font/v2.100/otf/TW/GenSenRounded2TW-M.otf",
+   "700": "https://raw.githubusercontent.com/ButTaiwan/gensen-font/v2.100/otf/TW/GenSenRounded2TW-B.otf",
+   "900": "https://raw.githubusercontent.com/ButTaiwan/gensen-font/v2.100/otf/TW/GenSenRounded2TW-H.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "genryu-min-tw",
+  "label": "源流明體",
+  "style": "serif",
+  "family": "\"GenRyuMin2 TW\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/ButTaiwan/genryu-font@v2.100/otf/TW/GenRyuMin2TW-R.otf",
+   "500": "https://cdn.jsdelivr.net/gh/ButTaiwan/genryu-font@v2.100/otf/TW/GenRyuMin2TW-M.otf",
+   "600": "https://cdn.jsdelivr.net/gh/ButTaiwan/genryu-font@v2.100/otf/TW/GenRyuMin2TW-SB.otf",
+   "700": "https://cdn.jsdelivr.net/gh/ButTaiwan/genryu-font@v2.100/otf/TW/GenRyuMin2TW-B.otf",
+   "900": "https://cdn.jsdelivr.net/gh/ButTaiwan/genryu-font@v2.100/otf/TW/GenRyuMin2TW-H.otf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/genryu-font/v2.100/otf/TW/GenRyuMin2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/genryu-font/v2.100/otf/TW/GenRyuMin2TW-M.otf",
+   "600": "https://raw.githubusercontent.com/ButTaiwan/genryu-font/v2.100/otf/TW/GenRyuMin2TW-SB.otf",
+   "700": "https://raw.githubusercontent.com/ButTaiwan/genryu-font/v2.100/otf/TW/GenRyuMin2TW-B.otf",
+   "900": "https://raw.githubusercontent.com/ButTaiwan/genryu-font/v2.100/otf/TW/GenRyuMin2TW-H.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "genwan-min-tw",
+  "label": "源雲明體",
+  "style": "serif",
+  "family": "\"GenWanMin2 TW\"",
+  "weights": [
+   "400",
+   "500",
+   "600"
+  ],
+  "webFiles": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/genwan-font/v2.100/otf/TW/GenWanMin2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/genwan-font/v2.100/otf/TW/GenWanMin2TW-M.otf",
+   "600": "https://raw.githubusercontent.com/ButTaiwan/genwan-font/v2.100/otf/TW/GenWanMin2TW-SB.otf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/genwan-font/v2.100/otf/TW/GenWanMin2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/genwan-font/v2.100/otf/TW/GenWanMin2TW-M.otf",
+   "600": "https://raw.githubusercontent.com/ButTaiwan/genwan-font/v2.100/otf/TW/GenWanMin2TW-SB.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "genseki-gothic-tw",
+  "label": "源石黑體",
+  "style": "sans",
+  "family": "\"GenSekiGothic2 TW\"",
+  "weights": [
+   "400",
+   "500",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/ButTaiwan/genseki-font@v2.100/otf/TW/GenSekiGothic2TW-R.otf",
+   "500": "https://cdn.jsdelivr.net/gh/ButTaiwan/genseki-font@v2.100/otf/TW/GenSekiGothic2TW-M.otf",
+   "700": "https://cdn.jsdelivr.net/gh/ButTaiwan/genseki-font@v2.100/otf/TW/GenSekiGothic2TW-B.otf",
+   "900": "https://cdn.jsdelivr.net/gh/ButTaiwan/genseki-font@v2.100/otf/TW/GenSekiGothic2TW-H.otf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/ButTaiwan/genseki-font/v2.100/otf/TW/GenSekiGothic2TW-R.otf",
+   "500": "https://raw.githubusercontent.com/ButTaiwan/genseki-font/v2.100/otf/TW/GenSekiGothic2TW-M.otf",
+   "700": "https://raw.githubusercontent.com/ButTaiwan/genseki-font/v2.100/otf/TW/GenSekiGothic2TW-B.otf",
+   "900": "https://raw.githubusercontent.com/ButTaiwan/genseki-font/v2.100/otf/TW/GenSekiGothic2TW-H.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "masafont",
+  "label": "正風毛筆",
+  "style": "brush",
+  "family": "\"MasaFont\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/masafont@2.1/webfont/MasaFont-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/masafont@2.1/webfont/MasaFont-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/masafont@2.1/tw/MasaFont-Medium.ttf",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/masafont@2.1/webfont/MasaFont-Bold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/masafont/2.1/tw/MasaFont-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/masafont/2.1/tw/MasaFont-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/masafont/2.1/tw/MasaFont-Medium.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/masafont/2.1/tw/MasaFont-Bold.ttf"
+  }
+ },
+ {
+  "id": "bakudai",
+  "label": "莫大毛筆",
+  "style": "brush",
+  "family": "\"Bakudai\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/bakudaifont@1.49/webfont/Bakudai-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/bakudaifont@1.49/webfont/Bakudai-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/bakudaifont@1.49/webfont/Bakudai-Medium.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/bakudaifont@1.49/webfont/Bakudai-Bold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/bakudaifont/1.49/tw/Bakudai-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/bakudaifont/1.49/tw/Bakudai-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/bakudaifont/1.49/tw/Bakudai-Medium.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/bakudaifont/1.49/tw/Bakudai-Bold.ttf"
+  }
+ },
+ {
+  "id": "naikai",
+  "label": "內海字體",
+  "style": "hand",
+  "family": "\"NaikaiFont\"",
+  "weights": [
+   "300",
+   "400",
+   "600",
+   "700"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/naikaifont@1.89/webfont/NaikaiFont-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/naikaifont@1.89/webfont/NaikaiFont-Regular.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/naikaifont@1.89/webfont/NaikaiFont-SemiBold.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/naikaifont@1.89/webfont/NaikaiFont-Bold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/naikaifont/1.89/tw/NaikaiFont-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/naikaifont/1.89/tw/NaikaiFont-Regular.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/naikaifont/1.89/tw/NaikaiFont-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/naikaifont/1.89/tw/NaikaiFont-Bold.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "nanifont",
+  "label": "何某手寫體",
+  "style": "hand",
+  "family": "\"NaniFont\"",
+  "weights": [
+   "300",
+   "400",
+   "600",
+   "700"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/nanifont@1.046/webfont/NaniFont-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/nanifont@1.046/webfont/NaniFont-Regular.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/nanifont@1.046/webfont/NaniFont-SemiBold.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/nanifont@1.046/webfont/NaniFont-Bold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/nanifont/1.046/ttf/NaniFont-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/nanifont/1.046/ttf/NaniFont-Regular.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/nanifont/1.046/ttf/NaniFont-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/nanifont/1.046/ttf/NaniFont-Bold.ttf"
+  }
+ },
+ {
+  "id": "pop-gothic",
+  "label": "大波浪圓體",
+  "style": "display",
+  "family": "\"Pop Gothic CJK TC\"",
+  "weights": [
+   "300",
+   "400",
+   "600",
+   "700"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/pop-gothic@2.143/webfont/CJK%20TC/PopGothicCjkTc-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/pop-gothic@2.143/webfont/CJK%20TC/PopGothicCjkTc-Regular.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/pop-gothic@2.143/webfont/CJK%20TC/PopGothicCjkTc-SemiBold.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/pop-gothic@2.143/webfont/CJK%20TC/PopGothicCjkTc-Bold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/pop-gothic/2.143/CJK%20TC/PopGothicCjkTc-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/pop-gothic/2.143/CJK%20TC/PopGothicCjkTc-Regular.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/pop-gothic/2.143/CJK%20TC/PopGothicCjkTc-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/pop-gothic/2.143/CJK%20TC/PopGothicCjkTc-Bold.ttf"
+  }
+ },
+ {
+  "id": "kurewa-gothic",
+  "label": "苦累蛙圓體",
+  "style": "hand",
+  "family": "\"Kurewa Gothic CJK TC\"",
+  "weights": [
+   "300",
+   "400",
+   "600",
+   "700"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/kurewa-gothic@1.071/webfont/CJK%20TC/KurewaGothicCjkTc-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/kurewa-gothic@1.071/webfont/CJK%20TC/KurewaGothicCjkTc-Regular.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/kurewa-gothic@1.071/webfont/CJK%20TC/KurewaGothicCjkTc-SemiBold.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/kurewa-gothic@1.071/webfont/CJK%20TC/KurewaGothicCjkTc-Bold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/kurewa-gothic/1.071/CJK%20TC/KurewaGothicCjkTc-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/kurewa-gothic/1.071/CJK%20TC/KurewaGothicCjkTc-Regular.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/kurewa-gothic/1.071/CJK%20TC/KurewaGothicCjkTc-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/kurewa-gothic/1.071/CJK%20TC/KurewaGothicCjkTc-Bold.ttf"
+  }
+ },
+ {
+  "id": "maruko-gothic",
+  "label": "馬路口圓體",
+  "style": "round",
+  "family": "\"Maruko Gothic CJKtc\"",
+  "weights": [
+   "300",
+   "400",
+   "500"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/maruko-gothic@1.015/webfont/CJK%20TC/MarukoGothicCJKtc-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/maruko-gothic@1.015/webfont/CJK%20TC/MarukoGothicCJKtc-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/maruko-gothic@1.015/webfont/CJK%20TC/MarukoGothicCJKtc-Medium.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/maruko-gothic/1.015/CJK%20TC/MarukoGothicCJKtc-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/maruko-gothic/1.015/CJK%20TC/MarukoGothicCJKtc-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/maruko-gothic/1.015/CJK%20TC/MarukoGothicCJKtc-Medium.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "swei-gothic",
+  "label": "獅尾圓體",
+  "style": "round",
+  "family": "\"Swei Gothic CJK TC\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.143/WebFont/CJK%20TC/SweiGothicCJKtc-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.143/WebFont/CJK%20TC/SweiGothicCJKtc-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.143/WebFont/CJK%20TC/SweiGothicCJKtc-Medium.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.143/WebFont/CJK%20TC/SweiGothicCJKtc-Bold.woff2",
+   "900": "https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.143/WebFont/CJK%20TC/SweiGothicCJKtc-Black.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/swei-gothic/2.143/CJK%20TC/SweiGothicCJKtc-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/swei-gothic/2.143/CJK%20TC/SweiGothicCJKtc-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/swei-gothic/2.143/CJK%20TC/SweiGothicCJKtc-Medium.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/swei-gothic/2.143/CJK%20TC/SweiGothicCJKtc-Bold.ttf",
+   "900": "https://raw.githubusercontent.com/max32002/swei-gothic/2.143/CJK%20TC/SweiGothicCJKtc-Black.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "swei-spring",
+  "label": "獅尾四季春",
+  "style": "serif",
+  "family": "\"Swei Spring CJK TC\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/max32002/swei-spring@1.068/WebFont/CJK%20TC/SweiSpringCJKtc-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/swei-spring@1.068/WebFont/CJK%20TC/SweiSpringCJKtc-Medium.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/swei-spring@1.068/WebFont/CJK%20TC/SweiSpringCJKtc-SemiBold.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/swei-spring@1.068/WebFont/CJK%20TC/SweiSpringCJKtc-Bold.woff2",
+   "900": "https://cdn.jsdelivr.net/gh/max32002/swei-spring@1.068/WebFont/CJK%20TC/SweiSpringCJKtc-Black.woff2"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/max32002/swei-spring/1.068/CJK%20TC/SweiSpringCJKtc-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/swei-spring/1.068/CJK%20TC/SweiSpringCJKtc-Medium.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/swei-spring/1.068/CJK%20TC/SweiSpringCJKtc-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/swei-spring/1.068/CJK%20TC/SweiSpringCJKtc-Bold.ttf",
+   "900": "https://raw.githubusercontent.com/max32002/swei-spring/1.068/CJK%20TC/SweiSpringCJKtc-Black.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "swei-sugar",
+  "label": "獅尾加糖宋",
+  "style": "serif",
+  "family": "\"Swei Sugar CJK TC\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/max32002/swei-sugar@1.061/WebFont/CJK%20TC/SweiSugarCJKtc-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/swei-sugar@1.061/WebFont/CJK%20TC/SweiSugarCJKtc-Medium.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/swei-sugar@1.061/WebFont/CJK%20TC/SweiSugarCJKtc-SemiBold.woff2",
+   "900": "https://cdn.jsdelivr.net/gh/max32002/swei-sugar@1.061/WebFont/CJK%20TC/SweiSugarCJKtc-Black.woff2"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/max32002/swei-sugar/1.061/CJK%20TC/SweiSugarCJKtc-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/swei-sugar/1.061/CJK%20TC/SweiSugarCJKtc-Medium.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/swei-sugar/1.061/CJK%20TC/SweiSugarCJKtc-SemiBold.ttf",
+   "900": "https://raw.githubusercontent.com/max32002/swei-sugar/1.061/CJK%20TC/SweiSugarCJKtc-Black.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "swei-meatball",
+  "label": "獅尾肉丸",
+  "style": "serif",
+  "family": "\"Swei Meatball CJK TC\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "700",
+   "900"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/max32002/swei-meatball@1.0/WebFont/CJK%20TC/SweiMeatballCJKtc-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/swei-meatball@1.0/WebFont/CJK%20TC/SweiMeatballCJKtc-Medium.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/swei-meatball@1.0/WebFont/CJK%20TC/SweiMeatballCJKtc-SemiBold.woff2",
+   "700": "https://cdn.jsdelivr.net/gh/max32002/swei-meatball@1.0/WebFont/CJK%20TC/SweiMeatballCJKtc-Bold.woff2",
+   "900": "https://cdn.jsdelivr.net/gh/max32002/swei-meatball@1.0/WebFont/CJK%20TC/SweiMeatballCJKtc-Black.woff2"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/max32002/swei-meatball/1.0/CJK%20TC/SweiMeatballCJKtc-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/swei-meatball/1.0/CJK%20TC/SweiMeatballCJKtc-Medium.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/swei-meatball/1.0/CJK%20TC/SweiMeatballCJKtc-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/max32002/swei-meatball/1.0/CJK%20TC/SweiMeatballCJKtc-Bold.ttf",
+   "900": "https://raw.githubusercontent.com/max32002/swei-meatball/1.0/CJK%20TC/SweiMeatballCJKtc-Black.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "taiwan-pearl",
+  "label": "台灣圓體",
+  "style": "round",
+  "family": "\"TaiwanPearl\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "600"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/TaiwanPearl@2.125/webfont/TaiwanPearl-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/TaiwanPearl@2.125/webfont/TaiwanPearl-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/TaiwanPearl@2.125/webfont/TaiwanPearl-Medium.woff2",
+   "600": "https://cdn.jsdelivr.net/gh/max32002/TaiwanPearl@2.125/webfont/TaiwanPearl-SemiBold.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/TaiwanPearl/2.125/ttf/TaiwanPearl-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/TaiwanPearl/2.125/ttf/TaiwanPearl-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/TaiwanPearl/2.125/ttf/TaiwanPearl-Medium.ttf",
+   "600": "https://raw.githubusercontent.com/max32002/TaiwanPearl/2.125/ttf/TaiwanPearl-SemiBold.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "fake-pearl",
+  "label": "假粉圓體",
+  "style": "round",
+  "family": "\"FakePearl\"",
+  "weights": [
+   "300",
+   "400",
+   "500"
+  ],
+  "webFiles": {
+   "300": "https://cdn.jsdelivr.net/gh/max32002/FakePearl@1.1/webfont/FakePearl-Light.woff2",
+   "400": "https://cdn.jsdelivr.net/gh/max32002/FakePearl@1.1/webfont/FakePearl-Regular.woff2",
+   "500": "https://cdn.jsdelivr.net/gh/max32002/FakePearl@1.1/webfont/FakePearl-Medium.woff2"
+  },
+  "files": {
+   "300": "https://raw.githubusercontent.com/max32002/FakePearl/1.1/tw/FakePearl-Light.ttf",
+   "400": "https://raw.githubusercontent.com/max32002/FakePearl/1.1/tw/FakePearl-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/max32002/FakePearl/1.1/tw/FakePearl-Medium.ttf"
+  }
+ },
+ {
+  "id": "lxgw-neo-zhisong",
+  "label": "霞鶩新致宋",
+  "style": "serif",
+  "family": "\"LXGW Neo ZhiSong\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgw-neo-zhi-song@2.0.0/dist/LXGWNeoZhiSong/result.css",
+  "files": {
+   "400": "https://github.com/lxgw/LxgwNeoZhiSong/releases/download/v1.071/LXGWNeoZhiSong.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "fanmei-hei",
+  "label": "繁梅黑體",
+  "style": "sans",
+  "family": "\"Fanmei Hei\"",
+  "weights": [
+   "400"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/lxgw/Fanmei@v1.000/Fanmei-Hei.ttf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/lxgw/Fanmei/v1.000/Fanmei-Hei.ttf"
+  }
+ },
+ {
+  "id": "fanmei-ming",
+  "label": "繁梅明體",
+  "style": "serif",
+  "family": "\"Fanmei Ming\"",
+  "weights": [
+   "400"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/lxgw/Fanmei@v1.000/Fanmei-Ming.ttf"
+  },
+  "files": {
+   "400": "https://raw.githubusercontent.com/lxgw/Fanmei/v1.000/Fanmei-Ming.ttf"
+  }
+ },
+ {
+  "id": "black-sugar-plum-candy",
+  "label": "黑糖話梅",
+  "style": "round",
+  "family": "\"Black Sugar Plum Candy\"",
+  "weights": [
+   "700"
+  ],
+  "webFiles": {
+   "700": "https://raw.githubusercontent.com/lxgw/BlackSugarPlumCandy/main/TTF/BlackSugarPlumCandy-Bold.ttf"
+  },
+  "files": {
+   "700": "https://raw.githubusercontent.com/lxgw/BlackSugarPlumCandy/main/TTF/BlackSugarPlumCandy-Bold.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "i-ming-cp",
+  "label": "一點明體",
+  "style": "serif",
+  "family": "\"I.MingCP\"",
+  "weights": [
+   "400"
+  ],
+  "webFiles": {
+   "400": "https://raw.githubusercontent.com/ichitenfont/I.Ming/master/8.10/I.MingCP-8.10.ttf"
+  },
+  "files": {
+   "400": "https://github.com/ichitenfont/I.Ming/releases/download/8.10/I.MingCP-8.10.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "muzai-pixel",
+  "label": "目哉像素體",
+  "style": "pixel",
+  "family": "\"MuzaiPixel\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/mzxst@3.0.0/dist/MZPXorig/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/DWNfonts/MuzaiPixel/2.0.20260705/MZPXorig.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "chill-round-f",
+  "label": "寒蟬全圓體",
+  "style": "round",
+  "family": "\"寒蝉全圆体\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/hcqyt@2.0.0/dist/ChillRoundFRegular/result.css",
+  "files": {
+   "400": "https://raw.githubusercontent.com/Warren2060/ChillRound/v1.805/ChillRound/ChillRoundF.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "maoken-assorted-sans-tc",
+  "label": "貓啃什錦黑",
+  "style": "display",
+  "family": "\"MaokenAssortedSans-TC\"",
+  "weights": [
+   "400"
+  ],
+  "webFiles": {
+   "400": "https://cdn.jsdelivr.net/gh/Skr-ZERO/MaokenAssortedSans-TC@v0.90/MaokenAssortedSans-TC.ttf"
+  },
+  "files": {
+   "400": "https://github.com/Skr-ZERO/MaokenAssortedSans-TC/releases/download/v0.90/MaokenAssortedSans-TC.ttf"
+  }
+ },
+ {
+  "id": "logosc-longzhuti",
+  "label": "標小智龍珠體",
+  "style": "display",
+  "family": "\"LogoSC LongZhuTi\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/bxzlzt@3.0.0/dist/%E6%A0%87%E5%B0%8F%E6%99%BA%E9%BE%99%E7%8F%A0%E4%BD%93/result.css",
+  "files": {
+   "400": "https://github.com/maoken-fonts/LongZhuTi/releases/download/v1.000/LogoSCLongZhuTi-Regular.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "tsuipita-tc",
+  "label": "曉聲通秋茄",
+  "style": "hand",
+  "family": "\"ToneOZ-Tsuipita-TC\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@chinese-fonts/toneoz-tsuipita@2.0.0/dist/ToneOZ-Tsuipita-TC/result.css",
+  "files": {
+   "400": "https://github.com/jeffreyxuan/toneoz-font-tsuipita/releases/download/v0.251009/ToneOZ-Tsuipita-TC.zip"
+  },
+  "zip": {
+   "400": "ToneOZ-Tsuipita-TC.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "fusion-pixel-12-tc",
+  "label": "縫合像素 12px",
+  "style": "pixel",
+  "family": "\"Fusion Pixel 12px Proportional TC\"",
+  "weights": [
+   "400"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@fontsource/fusion-pixel-12px-proportional-tc@5.3.0/index.css",
+  "files": {
+   "400": "https://github.com/TakWolf/fusion-pixel-font/releases/download/2026.11.10/fusion-pixel-font-12px-proportional-ttf-v2026.11.10.zip"
+  },
+  "zip": {
+   "400": "fusion-pixel-12px-proportional-zh_hant.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "glow-sans-tc",
+  "label": "未來熒黑",
+  "style": "sans",
+  "family": "\"Glow Sans TC\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "600",
+   "700",
+   "800",
+   "900"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@vp-tw/cjk-web-fonts-glow-sans-tc-normal@0.0.1/dist/index.css",
+  "files": {
+   "300": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip",
+   "400": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip",
+   "500": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip",
+   "600": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip",
+   "700": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip",
+   "800": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip",
+   "900": "https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansTC-Normal-v0.93.zip"
+  },
+  "zip": {
+   "300": "GlowSansTC-Normal-Light.otf",
+   "400": "GlowSansTC-Normal-Regular.otf",
+   "500": "GlowSansTC-Normal-Book.otf",
+   "600": "GlowSansTC-Normal-Medium.otf",
+   "700": "GlowSansTC-Normal-Bold.otf",
+   "800": "GlowSansTC-Normal-ExtraBold.otf",
+   "900": "GlowSansTC-Normal-Heavy.otf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "taipei-sans-tc",
+  "label": "台北黑體",
+  "style": "sans",
+  "family": "\"Taipei Sans TC\"",
+  "weights": [
+   "300",
+   "400",
+   "700"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@vp-tw/cjk-web-fonts-taipei-sans-tc@0.0.1/dist/index.css",
+  "files": {
+   "300": "https://media.githubusercontent.com/media/vp-tw/taipei-sans-tc/24ca88e96d1e842558df3ad6fad71993c07754c4/packages/core/src/TaipeiSansTCBeta-Light.ttf",
+   "400": "https://media.githubusercontent.com/media/vp-tw/taipei-sans-tc/24ca88e96d1e842558df3ad6fad71993c07754c4/packages/core/src/TaipeiSansTCBeta-Regular.ttf",
+   "700": "https://raw.githubusercontent.com/vp-tw/taipei-sans-tc/24ca88e96d1e842558df3ad6fad71993c07754c4/packages/core/src/TaipeiSansTCBeta-Bold.ttf"
+  },
+  "simplified": true
+ },
+ {
+  "id": "ibm-plex-sans-tc",
+  "label": "IBM Plex Sans TC",
+  "style": "sans",
+  "family": "\"IBM Plex Sans TC\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "600",
+   "700"
+  ],
+  "css": "https://cdn.jsdelivr.net/npm/@ibm/plex-sans-tc@1.1.1/css/ibm-plex-sans-tc-all.css",
+  "files": {
+   "300": "https://raw.githubusercontent.com/IBM/plex/%40ibm%2Fplex-sans-tc%401.1.1/packages/plex-sans-tc/fonts/complete/ttf/hinted/IBMPlexSansTC-Light.ttf",
+   "400": "https://raw.githubusercontent.com/IBM/plex/%40ibm%2Fplex-sans-tc%401.1.1/packages/plex-sans-tc/fonts/complete/ttf/hinted/IBMPlexSansTC-Regular.ttf",
+   "500": "https://raw.githubusercontent.com/IBM/plex/%40ibm%2Fplex-sans-tc%401.1.1/packages/plex-sans-tc/fonts/complete/ttf/hinted/IBMPlexSansTC-Medium.ttf",
+   "600": "https://raw.githubusercontent.com/IBM/plex/%40ibm%2Fplex-sans-tc%401.1.1/packages/plex-sans-tc/fonts/complete/ttf/hinted/IBMPlexSansTC-SemiBold.ttf",
+   "700": "https://raw.githubusercontent.com/IBM/plex/%40ibm%2Fplex-sans-tc%401.1.1/packages/plex-sans-tc/fonts/complete/ttf/hinted/IBMPlexSansTC-Bold.ttf"
+  }
+ },
+ {
+  "id": "noto-sans-tc",
+  "label": "Noto 思源黑體",
+  "style": "sans",
+  "family": "\"Noto Sans TC\"",
+  "weights": [
+   "100",
+   "200",
+   "300",
+   "400",
+   "500",
+   "600",
+   "700",
+   "800",
+   "900"
+  ],
+  "gfont": "Noto+Sans+TC"
+ },
+ {
+  "id": "noto-serif-tc",
+  "label": "Noto 思源宋體",
+  "style": "serif",
+  "family": "\"Noto Serif TC\"",
+  "weights": [
+   "200",
+   "300",
+   "400",
+   "500",
+   "600",
+   "700",
+   "800",
+   "900"
+  ],
+  "gfont": "Noto+Serif+TC"
+ },
+ {
+  "id": "zcool-qingke-huangyou",
+  "label": "站酷慶科黄油體",
+  "style": "display",
+  "family": "\"ZCOOL QingKe HuangYou\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "ZCOOL+QingKe+HuangYou",
+  "simplified": true
+ },
+ {
+  "id": "mochiy-pop-p-one",
+  "label": "Mochiy Pop P One",
+  "style": "display",
+  "family": "\"Mochiy Pop P One\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Mochiy+Pop+P+One"
+ },
+ {
+  "id": "dela-gothic-one",
+  "label": "Dela Gothic One",
+  "style": "display",
+  "family": "\"Dela Gothic One\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Dela+Gothic+One"
+ },
+ {
+  "id": "potta-one",
+  "label": "Potta One",
+  "style": "brush",
+  "family": "\"Potta One\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Potta+One"
+ },
+ {
+  "id": "shippori-mincho",
+  "label": "Shippori 明朝",
+  "style": "serif",
+  "family": "\"Shippori Mincho\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "gfont": "Shippori+Mincho"
+ },
+ {
+  "id": "shippori-antique",
+  "label": "Shippori Antique",
+  "style": "other",
+  "family": "\"Shippori Antique\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Shippori+Antique"
+ },
+ {
+  "id": "kaisei-tokumin",
+  "label": "Kaisei 特明",
+  "style": "serif",
+  "family": "\"Kaisei Tokumin\"",
+  "weights": [
+   "400",
+   "500",
+   "700",
+   "800"
+  ],
+  "gfont": "Kaisei+Tokumin"
+ },
+ {
+  "id": "kaisei-decol",
+  "label": "Kaisei Decol",
+  "style": "serif",
+  "family": "\"Kaisei Decol\"",
+  "weights": [
+   "400",
+   "500",
+   "700"
+  ],
+  "gfont": "Kaisei+Decol"
+ },
+ {
+  "id": "zen-old-mincho",
+  "label": "Zen Old Mincho",
+  "style": "serif",
+  "family": "\"Zen Old Mincho\"",
+  "weights": [
+   "400",
+   "500",
+   "600",
+   "700",
+   "900"
+  ],
+  "gfont": "Zen+Old+Mincho"
+ },
+ {
+  "id": "zen-antique-soft",
+  "label": "Zen Antique Soft",
+  "style": "serif",
+  "family": "\"Zen Antique Soft\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Zen+Antique+Soft"
+ },
+ {
+  "id": "new-tegomin",
+  "label": "New Tegomin",
+  "style": "serif",
+  "family": "\"New Tegomin\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "New+Tegomin"
+ },
+ {
+  "id": "biz-udp-mincho",
+  "label": "BIZ UDP 明朝",
+  "style": "serif",
+  "family": "\"BIZ UDPMincho\"",
+  "weights": [
+   "400",
+   "700"
+  ],
+  "gfont": "BIZ+UDPMincho"
+ },
+ {
+  "id": "biz-udp-gothic",
+  "label": "BIZ UDP 黑體",
+  "style": "sans",
+  "family": "\"BIZ UDPGothic\"",
+  "weights": [
+   "400",
+   "700"
+  ],
+  "gfont": "BIZ+UDPGothic"
+ },
+ {
+  "id": "zen-kaku-gothic-new",
+  "label": "Zen Kaku Gothic New",
+  "style": "sans",
+  "family": "\"Zen Kaku Gothic New\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700",
+   "900"
+  ],
+  "gfont": "Zen+Kaku+Gothic+New"
+ },
+ {
+  "id": "line-seed-jp",
+  "label": "LINE Seed JP",
+  "style": "sans",
+  "family": "\"LINE Seed JP\"",
+  "weights": [
+   "100",
+   "400",
+   "700",
+   "800"
+  ],
+  "gfont": "LINE+Seed+JP"
+ },
+ {
+  "id": "ibm-plex-sans-jp",
+  "label": "IBM Plex Sans JP",
+  "style": "sans",
+  "family": "\"IBM Plex Sans JP\"",
+  "weights": [
+   "100",
+   "200",
+   "300",
+   "400",
+   "500",
+   "600",
+   "700"
+  ],
+  "gfont": "IBM+Plex+Sans+JP"
+ },
+ {
+  "id": "zen-maru-gothic",
+  "label": "Zen Maru Gothic",
+  "style": "round",
+  "family": "\"Zen Maru Gothic\"",
+  "weights": [
+   "300",
+   "400",
+   "500",
+   "700",
+   "900"
+  ],
+  "gfont": "Zen+Maru+Gothic"
+ },
+ {
+  "id": "kiwi-maru",
+  "label": "Kiwi Maru",
+  "style": "round",
+  "family": "\"Kiwi Maru\"",
+  "weights": [
+   "300",
+   "400",
+   "500"
+  ],
+  "gfont": "Kiwi+Maru"
+ },
+ {
+  "id": "yusei-magic",
+  "label": "Yusei Magic",
+  "style": "hand",
+  "family": "\"Yusei Magic\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Yusei+Magic"
+ },
+ {
+  "id": "yomogi",
+  "label": "Yomogi",
+  "style": "hand",
+  "family": "\"Yomogi\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Yomogi"
+ },
+ {
+  "id": "yuji-syuku",
+  "label": "佑字 肅",
+  "style": "brush",
+  "family": "\"Yuji Syuku\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Yuji+Syuku"
+ },
+ {
+  "id": "yuji-mai",
+  "label": "佑字 舞",
+  "style": "brush",
+  "family": "\"Yuji Mai\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "Yuji+Mai"
+ },
+ {
+  "id": "dotgothic16",
+  "label": "DotGothic16",
+  "style": "pixel",
+  "family": "\"DotGothic16\"",
+  "weights": [
+   "400"
+  ],
+  "gfont": "DotGothic16"
+ }
+]

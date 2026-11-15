@@ -1,0 +1,30 @@
+#pragma code_page(65001)
+#include <winver.h>
+
+#include "resource.h"
+#include "version.h"
+
+IDI_APP ICON "../res/vox.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION VOX_VERSION_MAJOR, VOX_VERSION_MINOR, VOX_VERSION_PATCH, 0
+PRODUCTVERSION VOX_VERSION_MAJOR, VOX_VERSION_MINOR, VOX_VERSION_PATCH, 0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040404B0"
+    BEGIN
+      VALUE "FileDescription", "Vox"
+      VALUE "ProductName", "Vox"
+      VALUE "FileVersion", VOX_VERSION_STRING
+      VALUE "ProductVersion", VOX_VERSION_STRING
+      VALUE "OriginalFilename", "Vox.exe"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0404, 1200
+  END
+END

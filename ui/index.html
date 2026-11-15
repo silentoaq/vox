@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>Vox</title>
+<link rel="stylesheet" href="style.css">
+<script src="vendor/soundtouch/soundtouch.js"></script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div class="app">
+  <section class="stage">
+    <div class="screen"><div class="video" id="player"></div></div>
+    <div class="band" id="band"></div>
+    <div class="loading-mask" id="kMask" hidden>
+      <div class="spinner"></div>
+      <div class="mask-title" id="kMaskTitle"></div>
+      <div class="mask-bar"><span id="kMaskBar"></span></div>
+      <div class="mask-step" id="kMaskStep"></div>
+      <button class="btn" id="kMaskSkip" data-i18n="karaoke.skipWait"></button>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <nav class="tabs">
+      <button class="tab on" data-tab="pick" data-i18n="tab.pick"></button>
+      <button class="tab" data-tab="queue"><span data-i18n="tab.queue"></span><span class="count" id="qcount">0</span></button>
+      <button class="tab" data-tab="favorites" data-i18n="tab.favorites"></button>
+      <button class="tab" data-tab="playlists" data-i18n="tab.playlists"></button>
+      <button class="tab" data-tab="history" data-i18n="tab.history"></button>
+      <button class="settings-toggle" id="settingsToggle" data-i18n-label="settings.label"></button>
+    </nav>
+    <div class="pane" id="pick">
+      <div class="src-tabs" id="srcTabs">
+        <button class="src-tab on" data-source="ytm">YouTube</button>
+        <button class="src-tab" data-source="spotify">Spotify</button>
+      </div>
+      <form class="search" id="searchForm">
+        <input id="q" data-i18n-placeholder="search.placeholder" autocomplete="off">
+        <button class="btn primary" type="submit" data-i18n="search.submit"></button>
+      </form>
+      <div class="hint-bar" id="pickHint" hidden></div>
+      <div class="list" id="results"></div>
+    </div>
+    <div class="pane" id="queue" hidden>
+      <div class="list" id="queued"></div>
+    </div>
+    <div class="pane" id="favorites" hidden>
+      <div class="list" id="favs"></div>
+    </div>
+    <div class="pane" id="playlists" hidden>
+      <div class="src-tabs scope-tabs" id="plScopes"></div>
+      <div class="list" id="plists"></div>
+    </div>
+    <div class="pane" id="history" hidden>
+      <div class="list" id="hist"></div>
+    </div>
+    <div class="toast" id="toast" hidden></div>
+  </aside>
+
+  <div class="menu" id="menu" hidden></div>
+  <div class="dialog-backdrop" id="confirm" hidden>
+    <div class="dialog">
+      <div class="dialog-text" id="confirmText"></div>
+      <div class="dialog-keys">
+        <button class="btn" id="confirmCancel" data-i18n="common.cancel"></button>
+        <button class="btn danger" id="confirmOk"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fx settings-panel" id="settings" hidden>
+    <div class="fx-title" data-i18n="account.title"></div>
+    <div class="settings-note" data-i18n="account.optional"></div>
+    <div id="accountRows"></div>
+    <div class="fx-title" data-i18n="settings.language"></div>
+    <div class="select">
+      <button class="select-current" id="languageCurrent"></button>
+      <div class="select-list" id="languageList" hidden></div>
+    </div>
+    <div class="fx-title" data-i18n="settings.onClose"></div>
+    <div class="fx-row" id="closeRow"></div>
+  </div>
+
+  <div class="fx" id="fx" hidden>
+    <div class="fx-title" data-i18n="fx.equalizer"></div>
+    <div class="fx-row" id="fxEq"></div>
+    <div class="fx-title" data-i18n="fx.reverb"></div>
+    <div class="fx-row" id="fxReverb"></div>
+  </div>
+
+  <div class="fx style-panel" id="stylePanel" hidden>
+    <div class="color-preview"><div class="lyric"><div class="base" data-i18n="style.sample"></div><div class="fill" data-i18n="style.sample"></div></div></div>
+    <div class="style-body">
+      <div class="fx-title" data-i18n="style.font"></div>
+      <button class="font-current" id="fontCurrent"></button>
+      <div class="font-list" id="fontList" hidden></div>
+      <div class="style-row"><span class="style-label" data-i18n="style.weight"></span><div class="fx-row" id="weightRow"></div></div>
+
+      <div class="fx-title" data-i18n="style.color"></div>
+      <div class="fx-row" id="colorTargets">
+        <button class="seg on" data-target="sung"><i class="dot"></i><span data-i18n="style.sung"></span></button>
+        <button class="seg" data-target="unsung"><i class="dot"></i><span data-i18n="style.unsung"></span></button>
+        <button class="seg" data-target="outline"><i class="dot"></i><span data-i18n="style.outline"></span></button>
+        <button class="seg" data-target="background"><i class="dot"></i><span data-i18n="style.background"></span></button>
+      </div>
+      <div class="sv" id="sv"><div class="sv-knob" id="svKnob"></div></div>
+      <input type="range" class="hue" id="hue" min="0" max="359" step="1">
+      <div class="color-row">
+        <input class="hex" id="hex" maxlength="7" autocomplete="off" spellcheck="false">
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="style-row"><span class="style-label" data-i18n="style.outline"></span><div class="fx-row" id="outlineWidths"></div></div>
+      <div class="style-row"><span class="style-label" data-i18n="style.background"></span><div class="fx-row" id="backgroundRow"></div></div>
+
+      <div class="fx-title" data-i18n="style.stage"></div>
+      <div class="style-row">
+        <span class="style-label" data-i18n="style.size"></span>
+        <div class="stepper">
+          <button class="seg" id="sizeDown" data-i18n="style.smaller"></button>
+          <span class="stepper-value" id="sizeValue"></span>
+          <button class="seg" id="sizeUp" data-i18n="style.larger"></button>
+        </div>
+      </div>
+      <div class="style-row"><span class="style-label" data-i18n="style.lines"></span><div class="fx-row" id="lineCountRow"></div></div>
+      <div class="style-row"><span class="style-label" data-i18n="style.direction"></span><div class="fx-row" id="directionRow"></div></div>
+      <div class="style-row"><span class="style-label" data-i18n="style.align"></span><div class="fx-row" id="alignRow"></div></div>
+      <div class="style-row"><span class="style-label" data-i18n="style.zoom"></span><div class="fx-row" id="zoomRow"></div></div>
+    </div>
+  </div>
+
+  <footer class="bar">
+    <div class="np">
+      <img id="cover" alt="">
+      <div class="np-text">
+        <div class="np-head">
+          <div class="np-title" id="npTitle"></div>
+          <button class="heart" id="favToggle" data-i18n-label="action.favorite" hidden><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.5 1.2 4.3 2.4h2c.8-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
+        </div>
+        <div class="np-artist" id="npArtist"></div>
+        <div class="np-next" id="npNext"></div>
+      </div>
+    </div>
+    <div class="transport">
+      <div class="keys">
+        <button class="key" id="restart" data-i18n="key.restart"></button>
+        <button class="key main" id="toggle"></button>
+        <button class="key" id="skip" data-i18n="key.skip"></button>
+        <div class="pitch">
+          <button class="key small" id="keyDown" data-i18n="key.down"></button>
+          <span class="pitch-value" id="keyValue"></span>
+          <button class="key small" id="keyUp" data-i18n="key.up"></button>
+        </div>
+      </div>
+      <div class="progress">
+        <span id="cur">0:00</span>
+        <input type="range" id="seek" min="0" max="1000" value="0">
+        <span id="dur">0:00</span>
+      </div>
+    </div>
+    <div class="extras">
+      <div class="extra-keys">
+        <button class="key small" id="kToggle" data-i18n="key.karaoke"></button>
+        <button class="key small" id="fxToggle" data-i18n="key.effects"></button>
+        <button class="key small" id="styleToggle" data-i18n="key.style"></button>
+        <button class="key small" id="dlToggle"></button>
+      </div>
+      <div class="volume">
+        <span data-i18n="bar.volume"></span>
+        <input type="range" id="vol" min="0" max="100" value="60">
+        <span class="vol-num" id="volNum">60</span>
+      </div>
+      <div class="volume" id="vocalRow">
+        <span data-i18n="bar.vocal"></span>
+        <input type="range" id="vocal" min="0" max="100" value="0">
+        <span class="vol-num" id="vocalNum">0</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
