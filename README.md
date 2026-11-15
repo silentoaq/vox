@@ -138,7 +138,7 @@ powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 
 這會建置、列出每個檔案的雜湊、簽章、組出 `VoxSetup.exe`，再用 `wrangler` 傳到 Cloudflare R2。不加 `-Bucket` 就只產生上傳資料夾，裡面的 `latest\` 和 `files\` 照原樣放到任何靜態主機都可以。
 
-版本號改 `CMakeLists.txt` 的 `project(vox VERSION ...)`，更新網址改同一個檔案的 `VOX_UPDATE_URL`。
+版本號是發版當天的日期，像 `2026.11.16`，同一天再發一次就是 `2026.11.16.1`，腳本自己算。更新網址改 `CMakeLists.txt` 的 `VOX_UPDATE_URL`。
 
 ## 資料放在哪裡
 

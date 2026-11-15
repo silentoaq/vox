@@ -8,17 +8,25 @@ $root = Split-Path -Parent $PSScriptRoot
 $build = Join-Path $root 'build-release'
 $utf8 = New-Object Text.UTF8Encoding $false
 
-$cmakeLists = Get-Content (Join-Path $root 'CMakeLists.txt') -Raw
-if ($cmakeLists -notmatch 'project\(vox VERSION ([0-9]+\.[0-9]+\.[0-9]+)') { throw 'CMakeLists.txt 裡找不到版本號' }
-$version = $Matches[1]
 if (-not $UpdateUrl) {
-  if ($cmakeLists -notmatch 'set\(VOX_UPDATE_URL "([^"]+)"') { throw 'CMakeLists.txt 裡找不到 VOX_UPDATE_URL' }
+  if ((Get-Content (Join-Path $root 'CMakeLists.txt') -Raw) -notmatch 'set\(VOX_UPDATE_URL "([^"]+)"') { throw 'CMakeLists.txt 裡找不到 VOX_UPDATE_URL' }
   $UpdateUrl = $Matches[1]
 }
 if ($UpdateUrl -notmatch '/latest$') { throw "UpdateUrl 要以 /latest 結尾：$UpdateUrl" }
 $filesUrl = $UpdateUrl -replace '/latest$', '/files'
 
-cmake -S $root -B $build -DVOX_DEVTOOLS=OFF "-DVOX_UPDATE_URL=$UpdateUrl"
+$version = (Get-Date).ToString('yyyy.MM.dd', [Globalization.CultureInfo]::InvariantCulture)
+$published = @{}
+try {
+  $current = Invoke-WebRequest -UseBasicParsing "$UpdateUrl/manifest.json"
+  $online = [Text.Encoding]::UTF8.GetString($current.RawContentStream.ToArray()) | ConvertFrom-Json
+  foreach ($file in $online.files) { $published[$file.sha256] = $true }
+  if ($online.version -match "^$([regex]::Escape($version))(\.([0-9]+))?$") { $version = "$version.$(1 + [int]$Matches[2])" }
+} catch [Net.WebException] {
+  if ($_.Exception.Response.StatusCode -ne [Net.HttpStatusCode]::NotFound) { throw }
+}
+
+cmake -S $root -B $build -DVOX_DEVTOOLS=OFF "-DVOX_UPDATE_URL=$UpdateUrl" "-DVOX_VERSION=$version"
 if ($LASTEXITCODE -ne 0) { throw '設定建置失敗' }
 cmake --build $build --config Release --target vox vox-separate vox-launcher
 if ($LASTEXITCODE -ne 0) { throw '建置失敗' }
@@ -39,16 +47,6 @@ foreach ($name in @('Vox.exe', 'vox-separate.exe', 'onnxruntime.dll', 'LICENSE.t
 $launcherExe = Join-Path $build 'launcher\Release\Vox.exe'
 New-Item -ItemType Directory -Force (Join-Path $app 'launcher') | Out-Null
 Copy-Item $launcherExe (Join-Path $app 'launcher')
-
-$published = @{}
-try {
-  $current = Invoke-WebRequest -UseBasicParsing "$UpdateUrl/manifest.json"
-  foreach ($file in ([Text.Encoding]::UTF8.GetString($current.RawContentStream.ToArray()) | ConvertFrom-Json).files) {
-    $published[$file.sha256] = $true
-  }
-} catch [Net.WebException] {
-  if ($_.Exception.Response.StatusCode -ne [Net.HttpStatusCode]::NotFound) { throw }
-}
 
 $files = @()
 $fresh = 0

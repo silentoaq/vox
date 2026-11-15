@@ -49,7 +49,7 @@ std::wstring versionDir(const std::wstring& root, const std::wstring& version) {
 }
 
 bool isVersionText(const std::wstring& text) {
-  static const std::wregex pattern(L"^[0-9]+\\.[0-9]+\\.[0-9]+$");
+  static const std::wregex pattern(L"^[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?$");
   return std::regex_match(text, pattern);
 }
 
