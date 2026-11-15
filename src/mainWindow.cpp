@@ -2,6 +2,7 @@
 
 #include <dwmapi.h>
 
+#include <algorithm>
 #include <thread>
 #include <utility>
 
@@ -27,6 +28,8 @@ constexpr wchar_t kSettingsFile[] = L"\\window.json";
 constexpr COREWEBVIEW2_COLOR kBackground = {255, 0x0d, 0x0d, 0x10};
 constexpr int kMinWidth = 960;
 constexpr int kMinHeight = 620;
+constexpr int kStartWidth = 1360;
+constexpr int kStartHeight = 860;
 
 std::wstring hexOfColor(UINT32 rgb) {
   wchar_t text[8];
@@ -75,8 +78,12 @@ MainWindow::MainWindow(HINSTANCE instance) {
   RegisterClassExW(&wc);
 
   UINT dpi = GetDpiForSystem();
-  CreateWindowExW(0, kWindowClass, APP_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, MulDiv(1360, dpi, 96),
-                  MulDiv(860, dpi, 96), nullptr, nullptr, instance, this);
+  RECT work;
+  SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0);
+  const int width = std::min(MulDiv(kStartWidth, dpi, 96), int(work.right - work.left));
+  const int height = std::min(MulDiv(kStartHeight, dpi, 96), int(work.bottom - work.top));
+  CreateWindowExW(0, kWindowClass, APP_NAME, WS_OVERLAPPEDWINDOW, work.left + (work.right - work.left - width) / 2,
+                  work.top + (work.bottom - work.top - height) / 2, width, height, nullptr, nullptr, instance, this);
   BOOL dark = TRUE;
   DwmSetWindowAttribute(hwnd_, DWMWA_USE_IMMERSIVE_DARK_MODE, &dark, sizeof dark);
 
