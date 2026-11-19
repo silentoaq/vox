@@ -111,6 +111,7 @@ private:
   void ensureSurface();
 
   HWND hwnd_ = nullptr;
+  std::vector<HWINEVENTHOOK> windowHooks_;
   Command command_;
   Settings settings_;
   std::wstring title_;

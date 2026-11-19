@@ -56,6 +56,17 @@ constexpr const wchar_t* kIconFont = L"Segoe MDL2 Assets";
 constexpr wchar_t kCloseGlyph[] = L"";
 constexpr UINT32 kColors[] = {0x3AD38A, 0x3BA7FF, 0xFF6FA8, 0xFFD24A, 0xFFFFFF};
 
+HWND keptOnTop = nullptr;
+
+void CALLBACK windowEvent(HWINEVENTHOOK, DWORD event, HWND hwnd, LONG object, LONG, DWORD, DWORD) {
+  if (!keptOnTop || !IsWindowVisible(keptOnTop)) return;
+  if (event == EVENT_OBJECT_SHOW &&
+      (object != OBJID_WINDOW || !hwnd || GetAncestor(hwnd, GA_ROOT) != hwnd ||
+       (GetWindowLongPtrW(hwnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW)))
+    return;
+  SetWindowPos(keptOnTop, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+}
+
 const wchar_t* systemLyricFont() { return languageId() == L"zh-CN" ? L"Microsoft YaHei" : L"Microsoft JhengHei"; }
 
 class GlyphCollector : public IDWriteTextRenderer {
@@ -168,10 +179,16 @@ DesktopLyrics::DesktopLyrics(HINSTANCE instance, Command command) : command_(std
   applyLocked();
   updateLockWatch();
   if (settings_.visible) ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
+  keptOnTop = hwnd_;
+  for (DWORD event : {EVENT_SYSTEM_FOREGROUND, EVENT_OBJECT_SHOW})
+    windowHooks_.push_back(
+        SetWinEventHook(event, event, nullptr, windowEvent, 0, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS));
   tick();
 }
 
 DesktopLyrics::~DesktopLyrics() {
+  for (HWINEVENTHOOK hook : windowHooks_) UnhookWinEvent(hook);
+  keptOnTop = nullptr;
   if (memDc_) {
     SelectObject(memDc_, oldBitmap_);
     DeleteDC(memDc_);
