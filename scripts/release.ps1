@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $build = Join-Path $root 'build-release'
 $utf8 = New-Object Text.UTF8Encoding $false
+if ($Bucket -and (git -C $root status --porcelain)) { throw '有還沒提交的修改' }
 
 if (-not $UpdateUrl) {
   if ((Get-Content (Join-Path $root 'CMakeLists.txt') -Raw) -notmatch 'set\(VOX_UPDATE_URL "([^"]+)"') { throw 'CMakeLists.txt 裡找不到 VOX_UPDATE_URL' }
@@ -105,4 +106,23 @@ if ($Bucket) {
     npx --yes wrangler r2 object put "$Bucket/latest/$name" --file (Join-Path $latest $name) --cache-control 'no-cache' --remote
     if ($LASTEXITCODE -ne 0) { throw "上傳 latest/$name 失敗" }
   }
+
+  git -C $root tag "v$version"
+  if ($LASTEXITCODE -ne 0) { throw "建立標籤 v$version 失敗" }
+  git -C $root push origin "v$version"
+  if ($LASTEXITCODE -ne 0) { throw "推送標籤 v$version 失敗" }
+  if ((git -C $root remote get-url origin) -notmatch 'github\.com[:/](.+?)(\.git)?$') { throw 'origin 不是 GitHub 的 repo' }
+  $repo = $Matches[1]
+  $ask = Join-Path $out 'credential.txt'
+  [IO.File]::WriteAllText($ask, "protocol=https`nhost=github.com`n`n", $utf8)
+  $token = (cmd /c "git credential fill < `"$ask`"" | Where-Object { $_ -like 'password=*' }) -replace '^password=', ''
+  Remove-Item $ask
+  if (-not $token) { throw '拿不到 GitHub 的登入憑證' }
+  $headers = @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json' }
+  $release = Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/$repo/releases" -Headers $headers -ContentType 'application/json' `
+    -Body (ConvertTo-Json @{ tag_name = "v$version"; name = "Vox $version"; generate_release_notes = $true })
+  $ProgressPreference = 'SilentlyContinue'
+  Invoke-RestMethod -Method Post -Uri "https://uploads.github.com/repos/$repo/releases/$($release.id)/assets?name=VoxSetup.exe" -Headers $headers `
+    -ContentType 'application/octet-stream' -InFile (Join-Path $latest 'VoxSetup.exe') | Out-Null
+  "GitHub Release：$($release.html_url)"
 }
