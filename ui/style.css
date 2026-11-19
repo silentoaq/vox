@@ -53,6 +53,7 @@ img { display: block; }
 .video iframe { display: block; width: 100%; height: 100%; border: 0; }
 .source { position: absolute; inset: 0; }
 .video:not([data-active=ytm]) .source[data-source=ytm], .video:not([data-active=spotify]) .source[data-source=spotify] { visibility: hidden; }
+.video[data-window-hidden] .source[data-source=ytm] { display: none; }
 .source .embed { position: absolute; left: 0; bottom: 0; width: 300px; height: 80px; z-index: -1; }
 .source .art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
 .source .art:not([src]) { visibility: hidden; }

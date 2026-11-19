@@ -134,11 +134,11 @@
   "toast.playlistDeleted": "Playlist deleted",
   "toast.historyCleared": "Play history cleared",
   "toast.linkFailed": "Can't play this song right now. Try again later.",
+  "toast.commandFailed": "A command from another program didn't go through. Try again later.",
 
   "update.ready": "Version {version} is downloaded and will be used the next time you open Vox",
   "update.rejected": "Version {version} failed to start. Staying on the current version.",
   "update.failed": "Can't check for updates right now",
-  "api.portTaken": "The local API couldn't start: port {port} is in use by another program",
 
   "fx.equalizer": "Equalizer",
   "fx.reverb": "Reverb",

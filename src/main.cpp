@@ -7,6 +7,7 @@
 #include <winrt/base.h>
 
 #include "install.h"
+#include "link.h"
 #include "mainWindow.h"
 
 namespace {
@@ -45,6 +46,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
   std::wstring arg = argc > 1 ? argv[1] : L"";
   LocalFree(argv);
+  if (isOpenLink(arg)) arg.clear();
 
   HANDLE mutex = CreateMutexW(nullptr, FALSE, kInstanceMutex);
   if (GetLastError() == ERROR_ALREADY_EXISTS) {

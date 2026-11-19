@@ -45,7 +45,7 @@ add_executable(${APP_ID} WIN32
   src/accounts.cpp
   src/fonts.cpp
   src/lockdown.cpp
-  src/apiServer.cpp
+  src/nowPlaying.cpp
   src/install.cpp
   src/updater.cpp
   src/text.cpp
@@ -55,11 +55,11 @@ add_executable(${APP_ID} WIN32
 
 option(VOX_DEVTOOLS "Keep DevTools, browser shortcuts and remote debugging for development" OFF)
 
-target_include_directories(${APP_ID} PRIVATE "${WEBVIEW2_DIR}/include" "${GENERATED_DIR}" "${CMAKE_SOURCE_DIR}/deps/cpp-httplib")
+target_include_directories(${APP_ID} PRIVATE "${WEBVIEW2_DIR}/include" "${GENERATED_DIR}")
 set_target_properties(${APP_ID} PROPERTIES OUTPUT_NAME "${APP_NAME}")
 target_link_libraries(${APP_ID} PRIVATE
   "${WEBVIEW2_DIR}/x64/WebView2LoaderStatic.lib"
-  winhttp windowsapp shell32 advapi32 version dwmapi d2d1 dwrite bcrypt crypt32 ws2_32
+  winhttp windowsapp shell32 advapi32 version dwmapi d2d1 dwrite bcrypt crypt32
 )
 target_compile_definitions(${APP_ID} PRIVATE
   APP_NAME=L"${APP_NAME}"

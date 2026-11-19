@@ -6,9 +6,9 @@ import { escapeHtml } from './html.js';
 import { LANGUAGES, SYSTEM_LANGUAGE, language, t } from './i18n.js';
 import { createKaraoke } from './karaoke.js';
 import { library, loadLibrary } from './library.js';
-import { ApiError, createLocalApi } from './localApi.js';
+import { createNowPlaying } from './nowPlaying.js';
+import { RequestError } from './requestError.js';
 import { createLyricStyle } from './lyricStyle.js';
-import { lineIndexAt } from './lyrics/ktv.js';
 import { inScript, lyricsFor } from './lyrics/lyrics.js';
 import { createPlayback } from './playback.js';
 import { parseSongQuery, rankForQuery, songSearchText } from './songQuery.js';
@@ -22,6 +22,8 @@ const WIPE_FRAME_MS = 33;
 const TOAST_MS = 2200;
 const SKIP_AFTER_ERROR_MS = 3000;
 const OFFSET_STEP_MS = 500;
+const COMMAND_SETTLE_MS = 5000;
+const COMMAND_POLL_MS = 100;
 const CLOCK_DRIFT_MS = 50;
 const EFFECTS_KEY = 'effects';
 const NO_EFFECTS = { eq: 'flat', reverb: 'off' };
@@ -75,6 +77,7 @@ let offsetMs = 0;
 let desktop = { visible: false, locked: false };
 let sentClock = null;
 let sentPlayback = null;
+let publishedOffset = 0;
 let seeking = false;
 let timer = 0;
 let toastTimer = 0;
@@ -124,7 +127,7 @@ const playback = createPlayback($('player'), {
     if (nextTrack()) setTimeout(() => sameTrack(current, failed) && playNext(), SKIP_AFTER_ERROR_MS);
   }
 });
-const localApi = createLocalApi({ ready: playback.ready, command: runCommand, enqueue: enqueueRequest });
+const nowPlaying = createNowPlaying();
 
 function show(id, prop, value) {
   const key = `${id}.${prop}`;
@@ -494,8 +497,12 @@ function renderNowPlaying() {
   $('favToggle').hidden = !current;
   $('favToggle').classList.toggle('on', Boolean(current) && library.isFavorite(current));
   updateKeys();
-  localApi.publish('track', apiTrack(current));
-  localApi.publish('queue', { tracks: queue.map(apiTrack), next: apiTrack(nextTrack()), autoplay });
+  nowPlaying.send('track', {
+    title: current?.title ?? '',
+    artist: current?.artist ?? '',
+    album: current?.album ?? '',
+    cover: current?.thumb ?? ''
+  });
 }
 
 function toggleFavorite(track) {
@@ -610,22 +617,7 @@ function announceSong() {
   publishLyrics();
 }
 
-function apiTrack(track) {
-  if (!track) return null;
-  return {
-    source: track.source,
-    id: track.id,
-    kind: track.kind,
-    title: track.title,
-    artist: track.artist,
-    album: track.album,
-    duration: track.duration ? track.duration * 1000 : null,
-    cover: track.thumb || null,
-    url: sourceOf(track.source).webUrl(track.id)
-  };
-}
-
-function apiLyricsState() {
+function sharedLyricsState() {
   switch (lyricsState) {
     case 'ready':
     case 'loading':
@@ -636,50 +628,59 @@ function apiLyricsState() {
     case 'preview':
       return 'none';
     default:
-      throw new Error(`歌詞狀態對不上本機介面：${lyricsState}`);
+      throw new Error(`歌詞狀態對不上歌詞檔：${lyricsState}`);
   }
 }
 
 function publishLyrics() {
+  const offset = Math.round(lyricOffsetMs());
+  publishedOffset = offset;
   const lines = lyricsState === 'ready' ? lyricLines : [];
-  localApi.publish('lyrics', {
-    state: apiLyricsState(),
-    lines: lines.map((line) => {
-      const text = [...line.text];
-      return { start: line.start, text: line.text, chars: line.chars.map((c) => ({ start: c.t, end: c.e, text: text[c.i] })) };
+  nowPlaying.send('lyrics', {
+    text: JSON.stringify({
+      title: current?.title ?? '',
+      artist: current?.artist ?? '',
+      source: current?.source ?? '',
+      id: current?.id ?? '',
+      ...(current?.requestedAs === undefined ? {} : { requestedAs: current.requestedAs }),
+      ...(current?.thumb?.startsWith('https://') ? { cover: current.thumb } : {}),
+      state: sharedLyricsState(),
+      lines: lines.map((line) => {
+        const text = [...line.text];
+        return {
+          start: line.start - offset,
+          text: line.text,
+          chars: line.chars.map((c) => ({ start: c.t - offset, end: c.e - offset, text: text[c.i] }))
+        };
+      })
     })
   });
 }
 
 function publishPlayback() {
   const at = Date.now();
+  const duration = current ? Math.round(playback.duration() * 1000) : 0;
   const info = {
-    state: !current ? 'idle' : holding ? 'loading' : playback.isPlaying() ? 'playing' : 'paused',
-    duration: current ? Math.round(playback.duration() * 1000) : 0,
-    volume: Number($('vol').value),
-    keyShift,
-    karaoke: karaokeOn,
-    lyricOffset: Math.round(lyricOffsetMs())
+    state: !current
+      ? 'idle'
+      : holding
+        ? 'loading'
+        : playback.isPlaying()
+          ? 'playing'
+          : playback.wantsToPlay() && !playError
+            ? 'loading'
+            : 'paused',
+    duration
   };
   const position = current ? Math.round(playback.time() * 1000) : 0;
-  if (sentPlayback && Object.keys(info).every((key) => info[key] === sentPlayback[key])) {
+  if (sentPlayback && info.state === sentPlayback.state && info.duration === sentPlayback.duration) {
     const predicted = sentPlayback.position + (info.state === 'playing' ? at - sentPlayback.at : 0);
     if (Math.abs(predicted - position) < CLOCK_DRIFT_MS) return;
   }
   sentPlayback = { ...info, position, at };
-  localApi.publish('playback', sentPlayback);
+  nowPlaying.send('playback', { state: info.state, position, duration: info.duration });
 }
 
-function publishLine(lyricMs) {
-  const lines = lyricsState === 'ready' ? lyricLines : [];
-  const index = lineIndexAt(lines, lyricMs);
-  localApi.publish('line', {
-    index,
-    text: lines[index]?.text ?? '',
-    start: lines[index]?.start ?? null,
-    next: lines[index + 1]?.text ?? ''
-  });
-}
 
 function sendClock(ms, playing) {
   const at = performance.now();
@@ -709,10 +710,10 @@ async function playSong(track) {
   lyricLines = [];
   lyricsState = track.kind === 'video' ? 'mv' : previewOnly(track.source) ? 'preview' : 'loading';
   renderStage();
-  renderNowPlaying();
-  renderPanel();
   announceSong();
   frame();
+  renderNowPlaying();
+  renderPanel();
   refreshAutoplay();
   if (lyricsState === 'mv' || lyricsState === 'preview') return;
 
@@ -885,27 +886,27 @@ async function refreshAutoplay() {
   renderPanel();
 }
 
-function pick(track) {
+function pick(track, notify = true) {
   if (!current) {
     playFrom(track);
-    toast(t(holding ? 'toast.holding' : 'toast.playing', { title: track.title }));
+    if (notify) toast(t(holding ? 'toast.holding' : 'toast.playing', { title: track.title }));
     return;
   }
   queue.push(track);
   renderNowPlaying();
   renderPanel();
-  toast(t('toast.picked', { title: track.title, position: queue.length }));
+  if (notify) toast(t('toast.picked', { title: track.title, position: queue.length }));
 }
 
-function insert(track) {
+function insert(track, notify = true) {
   if (!current) {
-    pick(track);
+    pick(track, notify);
     return;
   }
   queue.unshift(track);
   renderNowPlaying();
   renderPanel();
-  toast(t('toast.inserted', { title: track.title }));
+  if (notify) toast(t('toast.inserted', { title: track.title }));
 }
 
 const noticeOf = (key, params) => ({ key: `notice:${key}:${language.id()}`, notice: t(key, params) });
@@ -958,7 +959,7 @@ function frame() {
   const wiping = band.render(bandState(lyricMs));
   sendClock(lyricMs, playing);
   publishPlayback();
-  publishLine(lyricMs);
+  if (Math.round(lyricOffsetMs()) !== publishedOffset) publishLyrics();
   setEmbedMuted(karaokeOn && Boolean(current) && karaoke.sync(now, playing));
   prepareNextWhenClose(now, duration);
   if (!playing) return;
@@ -1256,104 +1257,117 @@ $('toggle').addEventListener('click', () => {
 $('kMaskSkip').addEventListener('click', skipHold);
 $('restart').addEventListener('click', restart);
 function requireCurrent() {
-  if (!current) throw new ApiError(409, '現在沒有在播的歌');
+  if (!current) throw new RequestError(409, '現在沒有在播的歌');
 }
 
-function numberField(request, name) {
-  const value = request[name];
-  if (typeof value !== 'number' || !Number.isFinite(value)) throw new ApiError(400, `${name} 要是數字`);
-  return value;
-}
-
-function pauseFromApi() {
+function pauseNow() {
   holding = false;
   playback.pause();
   renderNowPlaying();
   frame();
 }
 
-function runCommand(request) {
+function playNow() {
+  if (holding) skipHold();
+  else playback.play();
+}
+
+async function settle(playing) {
+  const deadline = performance.now() + COMMAND_SETTLE_MS;
+  while (playback.isPlaying() !== playing) {
+    if (performance.now() > deadline) throw new RequestError(504, playing ? '播放器沒有開始播' : '播放器沒有停下來');
+    await new Promise((resolve) => setTimeout(resolve, COMMAND_POLL_MS));
+  }
+}
+
+async function runCommand(request) {
   switch (request.action) {
     case 'play':
       requireCurrent();
-      if (holding) skipHold();
-      else playback.play();
+      playNow();
+      await settle(true);
       break;
     case 'pause':
       requireCurrent();
-      pauseFromApi();
-      break;
-    case 'toggle':
-      requireCurrent();
-      if (holding) skipHold();
-      else playback.toggle();
+      pauseNow();
+      await settle(false);
       break;
     case 'next':
       requireCurrent();
       playNext();
       break;
-    case 'restart':
-      requireCurrent();
-      restart();
-      break;
-    case 'seek': {
-      requireCurrent();
-      const position = numberField(request, 'position');
-      if (position < 0) throw new ApiError(400, 'position 不能是負的');
-      playback.seek(position / 1000);
-      frame();
-      break;
-    }
-    case 'volume': {
-      const value = numberField(request, 'value');
-      if (value < 0 || value > 100) throw new ApiError(400, 'value 要在 0 到 100 之間');
-      applyVolume(Math.round(value));
-      saveText(VOLUME_KEY, $('vol').value);
-      break;
-    }
     default:
-      throw new ApiError(400, `不認得的 action：${request.action}`);
+      throw new RequestError(400, `不認得的 action：${request.action}`);
   }
-  return {};
 }
 
 function apiSource(id) {
   if (id === undefined) return searchSource;
   if (!sources.some((source) => source.id === id))
-    throw new ApiError(400, `沒有這個來源：${id}，可以用 ${sources.map((source) => source.id).join('、')}`);
+    throw new RequestError(400, `沒有這個來源：${id}，可以用 ${sources.map((source) => source.id).join('、')}`);
   return sourceOf(id);
 }
 
-async function apiLookup(request) {
+function apiTrackSource(request) {
+  if (request.source === undefined) throw new RequestError(400, '要給 source');
   const source = apiSource(request.source);
-  if (request.id !== undefined) {
-    if (request.query !== undefined) throw new ApiError(400, 'query 和 id 只能給一個');
-    if (request.source === undefined) throw new ApiError(400, '給 id 時也要給 source');
-    if (typeof request.id !== 'string' || !request.id) throw new ApiError(400, 'id 要是字串');
-    try {
-      return await source.track(request.id);
-    } catch (e) {
-      if (e instanceof TrackNotFound) throw new ApiError(404, e.message);
-      throw new ApiError(502, `${source.name} 查歌失敗：${e.message}`);
-    }
+  if (typeof request.id !== 'string' || !request.id) throw new RequestError(400, 'id 要是字串');
+  return source;
+}
+
+async function lookupTrack(request) {
+  if (request.query !== undefined) {
+    if (request.id !== undefined) throw new RequestError(400, 'query 和 id 只能給一個');
+    return (await findTracks(request))[0];
   }
-  if (typeof request.query !== 'string' || !request.query.trim()) throw new ApiError(400, '要給 query，或是 source 加 id');
+  if (request.source === undefined) throw new RequestError(400, '要給 query，或是 source 加 id');
+  const source = apiTrackSource(request);
+  try {
+    return await source.track(request.id);
+  } catch (e) {
+    if (e instanceof TrackNotFound) throw new RequestError(404, e.message);
+    throw new RequestError(502, `${source.name} 查歌失敗：${e.message}`);
+  }
+}
+
+async function enqueueRequest(request) {
+  if (request.insert !== undefined && typeof request.insert !== 'boolean') throw new RequestError(400, 'insert 要是 true 或 false');
+  const found = await lookupTrack(request);
+  const track = request.query === undefined ? found : { ...found, requestedAs: request.query };
+  if (request.insert) insert(track, false);
+  else pick(track, false);
+}
+
+async function findTracks(request) {
+  const source = apiSource(request.source);
+  if (typeof request.query !== 'string' || !request.query.trim()) throw new RequestError(400, '要給 query');
   let found;
   try {
     found = await searchSongs(source, request.query);
   } catch (e) {
-    throw new ApiError(502, `${source.name} 搜尋失敗：${e.message}`);
+    throw new RequestError(502, `${source.name} 搜尋失敗：${e.message}`);
   }
-  if (!found.length) throw new ApiError(404, `${source.name} 搜不到「${request.query.trim()}」`);
-  return found[0];
+  if (!found.length) throw new RequestError(404, `${source.name} 搜不到「${request.query.trim()}」`);
+  return found;
 }
 
-async function enqueueRequest(request) {
-  if (request.insert !== undefined && typeof request.insert !== 'boolean') throw new ApiError(400, 'insert 要是 true 或 false');
-  const track = await apiLookup(request);
-  if (request.insert) insert(track);
-  else pick(track);
-  return { track: apiTrack(track), position: queue.indexOf(track) + 1 };
+function queueIndexOf(request) {
+  if (request.query === undefined) {
+    apiTrackSource(request);
+    return queue.findIndex((track) => track.source === request.source && track.id === request.id);
+  }
+  if (request.source !== undefined || request.id !== undefined) throw new RequestError(400, 'query 和 source、id 只能擇一');
+  if (typeof request.query !== 'string' || !request.query.trim()) throw new RequestError(400, '要給 query');
+  return queue.findIndex((track) => track.requestedAs === request.query);
+}
+
+function dequeueRequest(request) {
+  const i = queueIndexOf(request);
+  if (i < 0) throw new RequestError(404, '待播清單裡沒有這首');
+  queue.splice(i, 1);
+  renderNowPlaying();
+  renderPanel();
+  if (!nextTrack()) refreshAutoplay();
 }
 
 function togglePopover(id) {
@@ -1505,14 +1519,35 @@ new ResizeObserver(() => {
   frame();
 }).observe($('band'));
 
-on('play', async ({ source, id }) => {
+async function openLink(kind, request) {
   await playback.ready;
   try {
-    playFrom(await sourceOf(source).track(id));
+    switch (kind) {
+      case 'queue':
+        await enqueueRequest(request);
+        break;
+      case 'command':
+        await runCommand(request);
+        break;
+      case 'dequeue':
+        dequeueRequest(request);
+        break;
+      default:
+        throw new Error(`不認得的連結：${kind}`);
+    }
   } catch (e) {
-    console.error('點歌連結失敗', e);
-    toast(t('toast.linkFailed'));
+    if (kind !== 'queue' && e instanceof RequestError && (e.status === 404 || e.status === 409)) {
+      console.info('連結要的狀態已經是這樣了', kind, request, e.message);
+      return;
+    }
+    console.error('連結失敗', kind, request, e);
+    toast(t(kind === 'queue' ? 'toast.linkFailed' : 'toast.commandFailed'));
   }
+}
+
+let links = Promise.resolve();
+on('link', ({ kind, request }) => {
+  links = links.then(() => openLink(kind, request));
 });
 
 on('karaoke', async (status) => {
@@ -1538,6 +1573,12 @@ on('control', ({ action }) => {
       break;
     case 'toggle':
       if (current) playback.toggle();
+      break;
+    case 'play':
+      if (current) playNow();
+      break;
+    case 'pause':
+      if (current) pauseNow();
       break;
     case 'skip':
       if (current) playNext();
@@ -1570,13 +1611,16 @@ on('update', ({ state, version, message }) => {
   }
 });
 
+function applyWindow(state) {
+  ({ closeToTray } = state);
+  $('player').toggleAttribute('data-window-hidden', !state.shown);
+}
+
+on('window', applyWindow);
+
 const started = await call('ready');
 desktop = started.desktopLyrics;
-({ closeToTray } = started.window);
-if (started.apiError) {
-  console.error(started.apiError);
-  toast(t('api.portTaken', { port: started.apiPort }));
-}
+applyWindow(started.window);
 await loadLibrary();
 renderDesktopKeys();
 lyricStyle.start(desktop);

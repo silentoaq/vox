@@ -128,11 +128,11 @@
   "toast.playlistDeleted": "已刪除歌單",
   "toast.historyCleared": "已清除播放歷史",
   "toast.linkFailed": "暫時無法播放這首，請稍後再試",
+  "toast.commandFailed": "其他程式送來的指令沒有成功，請稍後再試",
 
   "update.ready": "新版 {version} 已經下載好，下次開 Vox 就會換成新版",
   "update.rejected": "新版 {version} 開不起來，先繼續用目前的版本",
   "update.failed": "暫時無法檢查更新",
-  "api.portTaken": "本機介面開不起來：port {port} 被別的程式占用",
 
   "fx.equalizer": "等化器",
   "fx.reverb": "殘響",

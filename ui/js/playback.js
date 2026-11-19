@@ -2,6 +2,7 @@ import { sourceOf, sources } from './sources.js';
 
 export function createPlayback(element, handlers) {
   let active = null;
+  let wanted = false;
   const mounted = new Map();
   const mount = (source) => {
     if (!mounted.has(source)) mounted.set(source, source.player.mount(element, handlers));
@@ -12,6 +13,7 @@ export function createPlayback(element, handlers) {
   return {
     ready,
     async load(track, autoplay) {
+      wanted = autoplay;
       const next = sourceOf(track.source);
       if (active && active !== next) active.player.stop();
       active = next;
@@ -21,12 +23,20 @@ export function createPlayback(element, handlers) {
     },
     toggle() {
       if (!active) return;
-      if (active.player.isPlaying()) active.player.pause();
-      else active.player.play();
+      wanted = !active.player.isPlaying();
+      if (wanted) active.player.play();
+      else active.player.pause();
     },
-    play: () => active?.player.play(),
-    pause: () => active?.player.pause(),
+    play() {
+      wanted = true;
+      active?.player.play();
+    },
+    pause() {
+      wanted = false;
+      active?.player.pause();
+    },
     stop() {
+      wanted = false;
       active?.player.stop();
       active = null;
       delete element.dataset.active;
@@ -44,6 +54,7 @@ export function createPlayback(element, handlers) {
     },
     time: () => (active ? active.player.currentTime() : 0),
     duration: () => (active ? active.player.duration() : 0),
-    isPlaying: () => (active ? active.player.isPlaying() : false)
+    isPlaying: () => (active ? active.player.isPlaying() : false),
+    wantsToPlay: () => wanted
   };
 }

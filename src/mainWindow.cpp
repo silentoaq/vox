@@ -43,8 +43,6 @@ UINT32 colorOfHex(const std::wstring& hex) {
   return UINT32(std::stoul(hex.substr(1), nullptr, 16));
 }
 
-std::string errorJsonOf(const char* reason) { return std::string(R"({"error":")") + reason + R"("})"; }
-
 std::vector<LyricLine> lyricLinesOf(const JsonArray& items) {
   std::vector<LyricLine> lines;
   for (const auto& item : items) {
@@ -119,12 +117,9 @@ MainWindow::MainWindow(HINSTANCE instance) {
     params.SetNamedValue(L"progress", JsonValue::CreateNumberValue(status.progress));
     bridge_->emit(L"karaoke", params);
   });
-  api_ = std::make_unique<ApiServer>([this](const std::string& kind, const std::string& body, ApiServer::Reply reply) {
-    if (!runOnUi([this, kind, body, reply] { forwardApi(kind, body, reply); }))
-      reply({503, errorJsonOf("Vox 忙不過來，請再試一次")});
+  nowPlaying_ = std::make_unique<NowPlaying>(hwnd_, [this](const std::wstring& action) {
+    runOnUi([this, action] { control(action); });
   });
-  apiError_ = api_->start();
-  if (!apiError_.empty()) OutputDebugStringW((apiError_ + L"\n").c_str());
   updater_ = std::make_unique<Updater>([this](const UpdateStatus& status) {
     runOnUi([this, status] {
       JsonObject params;
@@ -188,24 +183,6 @@ void MainWindow::onTray(TrayCommand command) {
   }
 }
 
-void MainWindow::dropApiPending(const char* reason) {
-  for (auto& [id, reply] : std::exchange(apiPending_, {})) reply({503, errorJsonOf(reason)});
-}
-
-void MainWindow::forwardApi(const std::string& kind, const std::string& body, ApiServer::Reply reply) {
-  if (!pageReady_) {
-    reply({503, errorJsonOf("Vox 還在啟動")});
-    return;
-  }
-  double id = ++nextApiId_;
-  apiPending_.emplace(id, std::move(reply));
-  JsonObject params;
-  params.SetNamedValue(L"id", JsonValue::CreateNumberValue(id));
-  params.SetNamedValue(L"kind", JsonValue::CreateStringValue(winrt::to_hstring(kind)));
-  params.SetNamedValue(L"body", JsonValue::CreateStringValue(winrt::to_hstring(body)));
-  bridge_->emit(L"api", params);
-}
-
 Bridge::JsonObject MainWindow::desktopLyricsState() const {
   JsonObject state;
   state.SetNamedValue(L"visible", JsonValue::CreateBooleanValue(lyrics_->visible()));
@@ -231,20 +208,25 @@ Bridge::JsonObject MainWindow::languageState() const {
 Bridge::JsonObject MainWindow::windowState() const {
   JsonObject state;
   state.SetNamedValue(L"closeToTray", JsonValue::CreateBooleanValue(closeToTray_));
+  state.SetNamedValue(L"shown", JsonValue::CreateBooleanValue(windowShown_));
   return state;
+}
+
+void MainWindow::syncShown() {
+  const bool shown = IsWindowVisible(hwnd_) && !IsIconic(hwnd_);
+  if (shown == windowShown_) return;
+  windowShown_ = shown;
+  if (pageReady_) bridge_->emit(L"window", windowState());
 }
 
 void MainWindow::registerMethods() {
   bridge_->on(L"ready", [this](const JsonObject&) {
-    dropApiPending("Vox 的畫面重新載入了");
     pageReady_ = true;
-    playPending();
+    sendPendingLinks();
     updater_->started();
     JsonObject result;
     result.SetNamedValue(L"desktopLyrics", desktopLyricsState());
     result.SetNamedValue(L"window", windowState());
-    result.SetNamedValue(L"apiError", JsonValue::CreateStringValue(apiError_));
-    result.SetNamedValue(L"apiPort", JsonValue::CreateNumberValue(kApiPort));
     return result;
   });
   bridge_->on(L"language.get", [this](const JsonObject&) { return languageState(); });
@@ -259,17 +241,21 @@ void MainWindow::registerMethods() {
     saveSettings();
     return windowState();
   });
-  bridge_->on(L"api.reply", [this](const JsonObject& params) {
-    double id = params.GetNamedNumber(L"id");
-    auto found = apiPending_.find(id);
-    if (found == apiPending_.end()) throw winrt::hresult_invalid_argument(L"本機介面沒有這個請求：" + std::to_wstring(id));
-    ApiServer::Reply reply = std::move(found->second);
-    apiPending_.erase(found);
-    reply({int(params.GetNamedNumber(L"status")), winrt::to_string(params.GetNamedString(L"body"))});
+  bridge_->on(L"nowPlaying.track", [this](const JsonObject& params) {
+    const std::wstring title(params.GetNamedString(L"title"));
+    if (title.empty()) nowPlaying_->clearTrack();
+    else
+      nowPlaying_->setTrack({title, std::wstring(params.GetNamedString(L"artist")), std::wstring(params.GetNamedString(L"album")),
+                             std::wstring(params.GetNamedString(L"cover"))});
     return JsonObject();
   });
-  bridge_->on(L"api.publish", [this](const JsonObject& params) {
-    api_->publish(winrt::to_string(params.GetNamedString(L"event")), winrt::to_string(params.GetNamedString(L"data")));
+  bridge_->on(L"nowPlaying.playback", [this](const JsonObject& params) {
+    nowPlaying_->setPlayback(std::wstring(params.GetNamedString(L"state")), params.GetNamedNumber(L"position"),
+                             params.GetNamedNumber(L"duration"));
+    return JsonObject();
+  });
+  bridge_->on(L"nowPlaying.lyrics", [this](const JsonObject& params) {
+    nowPlaying_->setLyrics(std::wstring(params.GetNamedString(L"text")));
     return JsonObject();
   });
   bridge_->onAsync(L"karaoke.prepare", [this](const JsonObject& params, Bridge::Respond respond, Bridge::Fail) {
@@ -384,22 +370,23 @@ bool MainWindow::runOnUi(std::function<void()> task) {
 void MainWindow::show(int command) { ShowWindow(hwnd_, command); }
 
 void MainWindow::openLink(const std::wstring& link) {
-  auto videoId = videoIdOfLink(link);
-  if (!videoId) {
+  auto request = requestOfLink(link);
+  if (!request) {
     OutputDebugStringW((L"看不懂的連結：" + link + L"\n").c_str());
     return;
   }
-  pendingVideo_ = *videoId;
-  if (pageReady_) playPending();
+  pendingLinks_.push_back(*request);
+  if (pageReady_) sendPendingLinks();
 }
 
-void MainWindow::playPending() {
-  if (!pendingVideo_) return;
-  JsonObject params;
-  params.SetNamedValue(L"source", JsonValue::CreateStringValue(L"ytm"));
-  params.SetNamedValue(L"id", JsonValue::CreateStringValue(*pendingVideo_));
-  pendingVideo_.reset();
-  bridge_->emit(L"play", params);
+void MainWindow::sendPendingLinks() {
+  for (const auto& link : pendingLinks_) {
+    JsonObject params;
+    params.SetNamedValue(L"kind", JsonValue::CreateStringValue(link.kind));
+    params.SetNamedValue(L"request", link.request);
+    bridge_->emit(L"link", params);
+  }
+  pendingLinks_.clear();
 }
 
 void MainWindow::activate() {
@@ -440,7 +427,8 @@ void MainWindow::createWebView() {
   const std::wstring frameScript = L"(() => {\n" + *soundTouch + L"\n" + graph + L"\n" + *frameBody + L"\n})();";
   clearDebugArguments();
   auto options = Make<CoreWebView2EnvironmentOptions>();
-  options->put_AdditionalBrowserArguments(L"--autoplay-policy=no-user-gesture-required");
+  options->put_AdditionalBrowserArguments(
+    L"--autoplay-policy=no-user-gesture-required --disable-features=HardwareMediaKeyHandling");
   HRESULT hr = CreateCoreWebView2EnvironmentWithOptions(
     nullptr, (appDataDir() + L"\\WebView2").c_str(), options.Get(),
     Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
@@ -465,7 +453,6 @@ void MainWindow::createWebView() {
                      controller_.As(&controller2);
                      controller2->put_DefaultBackgroundColor(kBackground);
                      fitWebView();
-                     syncWebView();
 
                      ComPtr<ICoreWebView2_3> webview3;
                      webview_.As(&webview3);
@@ -517,14 +504,6 @@ void MainWindow::fitWebView() {
   controller_->put_Bounds(bounds);
 }
 
-void MainWindow::syncWebView() {
-  if (!controller_) return;
-  const bool visible = IsWindowVisible(hwnd_) && !IsIconic(hwnd_);
-  if (visible == webViewVisible_) return;
-  webViewVisible_ = visible;
-  controller_->put_IsVisible(visible);
-}
-
 LRESULT CALLBACK MainWindow::proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
   if (message == WM_NCCREATE) {
     auto* self = static_cast<MainWindow*>(reinterpret_cast<CREATESTRUCTW*>(lparam)->lpCreateParams);
@@ -541,7 +520,7 @@ LRESULT MainWindow::handle(UINT message, WPARAM wparam, LPARAM lparam) {
       if (wparam != SIZE_MINIMIZED) fitWebView();
       return 0;
     case WM_WINDOWPOSCHANGED:
-      syncWebView();
+      syncShown();
       break;
     case WM_SYSCOMMAND:
       if ((wparam & 0xFFF0) == SC_CLOSE && closeToTray_ && tray_->shown()) {

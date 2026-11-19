@@ -13,7 +13,7 @@ Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所�
 - **桌面歌詞**：一條浮在所有視窗上面的歌詞，可以鎖定，滑鼠會穿過去。
 - **背景播放**：關閉視窗會收進系統匣繼續播，系統匣圖示可以暫停、切歌、開關桌面歌詞和結束。設定裡可以改成關閉視窗就結束。
 - **收藏、歌單、播放歷史**：存在這台電腦上；登入後也能用 YouTube、Spotify 帳號裡的歌單。
-- **給其他程式用**：`vox://` 連結可以叫它播歌，本機介面可以讀到正在播什麼、唱到哪一句。
+- **給其他程式用**：`vox://` 連結可以叫它點歌、播放、暫停；正在播什麼會報給 Windows 的媒體控制，逐字歌詞存成檔案。
 - **語言**：繁體中文、简体中文、English，預設跟著系統。歌詞的繁簡、歌名和歌單的顯示語言、預設字型也跟著換。
 
 ## 安裝
@@ -36,56 +36,54 @@ Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所�
 
 ## 給其他程式用
 
+叫 Vox 做事用 `vox://` 連結；要知道正在播什麼，讀 Windows 的媒體控制和 Vox 存的歌詞檔。
+
 ### 連結
 
 ```
-vox://play/<YouTube 影片 id>
+vox://open
+vox://queue?query=晴天/周杰倫
+vox://queue?query=晴天/周杰倫&source=spotify&insert=true
+vox://queue?source=ytm&id=QoXDQa9L12A
+vox://command?action=pause
+vox://dequeue?query=晴天/周杰倫
+vox://dequeue?source=ytm&id=QoXDQa9L12A
 ```
 
-Vox 沒開的話會開起來播這首，已經開著就直接切歌。
+- `open`：打開 Vox，已經開著就把視窗叫到前面。
+- `queue`：把歌加進待播清單，沒在播就直接播。`query` 給歌名，可以寫成「歌名/歌手」，加入搜尋結果的第一首；加上 `source` 就只在那個平台搜，可以是 `ytm` 或 `spotify`，不給就用 Vox 搜尋框目前選的平台。知道是哪一首的話，也可以給 `source` 加 `id`。加 `insert=true` 會排到下一首。
+- `command`：`action` 可以是 `play`、`pause`、`next`。
+- `dequeue`：從待播清單移除一首。給 `query` 會移除用同一段 `query` 點的那首，也可以給 `source` 加 `id`。有好幾首符合就移除最前面那首。
 
-### 本機介面
+中文可以直接寫，也可以做網址編碼。除了 `open`，Vox 沒開的話會在背景開起來，不會搶走目前視窗的焦點。連結照收到的順序一個一個做。做不到時 Vox 會跳提示，但要的狀態本來就是那樣的不跳，例如沒在播時暫停、要移除的歌已經不在清單裡。
 
-Vox 開著時會在 `http://127.0.0.1:8690` 提供介面，只有這台電腦上的程式連得到，網頁發出的請求一律拒絕。回應都是 JSON，失敗時是 `{"error": "原因"}`。
+安裝時會在 `HKEY_CURRENT_USER\Software\Classes\vox` 登記，從 `HKEY_CLASSES_ROOT\vox\shell\open\command` 也讀得到。
 
-| 方法 | 路徑 | 做什麼 |
-|---|---|---|
-| GET | `/api/v1/state` | 目前的歌、播放狀態、唱到的那句、待播清單 |
-| GET | `/api/v1/lyrics` | 整首歌詞，含每個字的時間 |
-| GET | `/api/v1/queue` | 待播清單 |
-| GET | `/api/v1/events` | 即時推播（SSE），事件有 `track`、`playback`、`lyrics`、`line`、`queue` |
-| POST | `/api/v1/command` | 控制播放 |
-| POST | `/api/v1/queue` | 點歌 |
+### 正在播什麼
 
-`/api/v1/events` 一連上會先送一次每種事件的現況，之後只在有變化時推。
+Vox 開著時會在 Windows 的媒體控制登記一個工作階段，`SourceAppUserModelId` 是 `Vox.exe`。用 `GlobalSystemMediaTransportControlsSessionManager` 讀：
 
-控制播放：
+- 歌名、歌手、專輯、封面。
+- 播放狀態：`Playing`、`Paused`；換歌、拖進度條、緩衝時是 `Changing`；沒有歌時是 `Stopped`。
+- 時間軸：`Position` 是 `LastUpdatedTime` 那一刻播到的位置，`EndTime` 是歌曲長度。播放中不會一直更新，現在播到哪要自己算：`Position + (現在 − LastUpdatedTime)`。換歌、暫停、拖進度條時會立刻更新。
 
-```
-curl -X POST http://127.0.0.1:8690/api/v1/command -d "{\"action\":\"pause\"}"
-```
+鍵盤的媒體鍵和 Windows 的媒體控制面板也能播放、暫停、下一首。
 
-`action` 可以是 `play`、`pause`、`toggle`、`next`、`restart`、`seek`（加 `position`，毫秒）、`volume`（加 `value`，0 到 100）。
+### 歌詞檔
 
-點歌，用歌名搜尋或直接給 id：
-
-```
-curl -X POST http://127.0.0.1:8690/api/v1/queue -d "{\"query\":\"周杰倫 晴天\"}"
-curl -X POST http://127.0.0.1:8690/api/v1/queue -d "{\"source\":\"ytm\",\"id\":\"QoXDQa9L12A\",\"insert\":true}"
-```
-
-`source` 是 `ytm` 或 `spotify`；`insert` 設成 `true` 會排到下一首。`query` 也可以寫成「歌名/歌手」，會挑歌手或上傳者符合的那一首。
-
-`playback` 的內容：
+正在播的歌的逐字歌詞存在 `%LOCALAPPDATA%\Vox\lyrics.json`，換歌、歌詞載好、在 Vox 裡調歌詞快慢時會整個重寫：
 
 ```json
-{ "state": "playing", "position": 61234, "at": 1794676502377, "duration": 215000,
-  "volume": 60, "keyShift": 0, "karaoke": false, "lyricOffset": 0 }
+{ "title": "晴天", "artist": "周杰倫", "source": "ytm", "id": "…", "state": "ready",
+  "lines": [ { "start": 21350, "text": "故事的小黃花",
+               "chars": [ { "start": 21350, "end": 21700, "text": "故" }, … ] } ] }
 ```
 
-- `state` 是 `idle`、`loading`、`playing`、`paused` 其中一個。
-- 播放中不會每秒推一次位置。現在播到第幾毫秒要自己算：`position + (現在的時間 − at)`，`at` 是 Unix 毫秒。
-- 歌詞要對的時間是播放位置加上 `lyricOffset`。
+- `title`、`artist` 跟媒體控制裡的一樣，用來確認是同一首。換歌時會先寫好這個檔，媒體控制才換成新歌。
+- `requestedAs`：這首是用 `vox://queue?query=` 點進來的話，是那段 `query`，一字不改；不是的話沒有這個欄位。
+- `cover`：封面的 https 網址，跟 Vox 畫面上的同一張；沒有封面就沒有這個欄位。
+- `state` 是 `ready`、`loading`、`error`、`none` 其中一個，不是 `ready` 時 `lines` 是空的。
+- 時間都是毫秒，已經對好媒體控制的播放位置，直接拿位置來比就好。唱到哪一句：找 `start` 不超過播放位置的最後一行；唱到哪個字：看每個字的 `start` 和 `end`。
 
 ## 從原始碼建置
 
@@ -98,11 +96,11 @@ cmake --build build --config Release --target vox vox-separate
 build\Release\Vox.exe
 ```
 
-`scripts\deps.ps1` 會把 WebView2 SDK、ONNX Runtime、Opus、cpp-httplib 等相依元件和伴唱模型下載到 `deps\`。開發時加 `-DVOX_DEVTOOLS=ON` 可以開 DevTools。
+`scripts\deps.ps1` 會把 WebView2 SDK、ONNX Runtime、Opus 等相依元件和伴唱模型下載到 `deps\`。開發時加 `-DVOX_DEVTOOLS=ON` 可以開 DevTools。
 
 程式分三塊：
 
-- `src\`：視窗、WebView2、帳號、桌面歌詞、本機介面、更新。`src\launcher\` 是啟動器，也負責安裝和解除安裝。
+- `src\`：視窗、WebView2、帳號、桌面歌詞、媒體控制、更新。`src\launcher\` 是啟動器，也負責安裝和解除安裝。
 - `separate\`：人聲分離，獨立的執行檔。
 - `ui\`：畫面，沒有建置步驟的 HTML、CSS、JavaScript。
 
@@ -152,6 +150,6 @@ powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 
 Vox 以 [GPL-3.0](LICENSE) 釋出。
 
-用到的第三方元件有 WebView2、ONNX Runtime、Opus、libopusenc、PocketFFT、cpp-httplib、SoundTouch、opencc-js，各自的授權條款全文在安裝資料夾的 `THIRD_PARTY_NOTICES.txt`。人聲分離用的是 Meta Research 的 [Demucs](https://github.com/facebookresearch/demucs) 模型，伴唱的音訊由 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 下載。
+用到的第三方元件有 WebView2、ONNX Runtime、Opus、libopusenc、PocketFFT、SoundTouch、opencc-js，各自的授權條款全文在安裝資料夾的 `THIRD_PARTY_NOTICES.txt`。人聲分離用的是 Meta Research 的 [Demucs](https://github.com/facebookresearch/demucs) 模型，伴唱的音訊由 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 下載。
 
 Vox 是獨立的專案，跟 YouTube、Google、Spotify 沒有關係。

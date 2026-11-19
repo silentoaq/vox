@@ -128,11 +128,11 @@
   "toast.playlistDeleted": "已删除歌单",
   "toast.historyCleared": "已清空播放历史",
   "toast.linkFailed": "暂时无法播放这首歌，请稍后再试",
+  "toast.commandFailed": "其他程序发来的指令没有成功，请稍后再试",
 
   "update.ready": "新版 {version} 已下载完成，下次打开 Vox 时自动切换",
   "update.rejected": "新版 {version} 无法启动，继续使用当前版本",
   "update.failed": "暂时无法检查更新",
-  "api.portTaken": "本机接口无法启动：端口 {port} 已被其他程序占用",
 
   "fx.equalizer": "均衡器",
   "fx.reverb": "混响",

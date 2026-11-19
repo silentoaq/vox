@@ -10,8 +10,6 @@ endfunction()
 
 component("WebView2 SDK" "https://www.nuget.org/packages/Microsoft.Web.WebView2"
   deps/webview2/LICENSE.txt deps/webview2/NOTICE.txt)
-component("cpp-httplib" "https://github.com/yhirose/cpp-httplib"
-  deps/cpp-httplib/LICENSE)
 component("ONNX Runtime" "https://github.com/microsoft/onnxruntime"
   deps/onnxruntime/LICENSE deps/onnxruntime/ThirdPartyNotices.txt)
 component("Opus" "https://opus-codec.org"

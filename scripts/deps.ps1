@@ -21,11 +21,6 @@ New-Item -ItemType Directory -Force $pocketfft | Out-Null
 Invoke-WebRequest 'https://raw.githubusercontent.com/mreineck/pocketfft/cpp/pocketfft_hdronly.h' -OutFile (Join-Path $pocketfft 'pocketfft_hdronly.h')
 Invoke-WebRequest 'https://raw.githubusercontent.com/mreineck/pocketfft/cpp/LICENSE.md' -OutFile (Join-Path $pocketfft 'LICENSE.md')
 
-$httplib = Join-Path $deps 'cpp-httplib'
-New-Item -ItemType Directory -Force $httplib | Out-Null
-Invoke-WebRequest 'https://raw.githubusercontent.com/yhirose/cpp-httplib/v0.64.0/httplib.h' -OutFile (Join-Path $httplib 'httplib.h')
-Invoke-WebRequest 'https://raw.githubusercontent.com/yhirose/cpp-httplib/v0.64.0/LICENSE' -OutFile (Join-Path $httplib 'LICENSE')
-
 function Get-Source($url, $folder) {
   $archive = Join-Path $deps "$folder.tar.gz"
   $target = Join-Path $deps $folder
