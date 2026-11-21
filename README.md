@@ -137,7 +137,7 @@ powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 
 這會建置、用 NSIS 打包成 `VoxSetup.exe`、把安裝程式的雜湊寫進 `update.json` 並簽章，再用 `wrangler` 傳到 Cloudflare R2，最後打標籤、建 GitHub Release。不加 `-Bucket` 就只產生上傳資料夾，裡面的 `latest\` 和 `files\` 照原樣放到任何靜態主機都可以。
 
-版本號是發版當天的日期，像 `2026.11.16`，同一天再發一次就是 `2026.11.16.1`，腳本照 git 標籤自己算。
+版本號是發版當天的日期，像 `2026.11.16`，同一天再發一次就是 `2026.11.16.1`，腳本照 git 標籤自己算。更新網址改 `CMakeLists.txt` 的 `VOX_UPDATE_URL`。
 
 ### 下載頁
 
@@ -145,7 +145,7 @@ powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 
 ```
 npx wrangler deploy
-```更新網址改 `CMakeLists.txt` 的 `VOX_UPDATE_URL`。
+```
 
 ## 資料放在哪裡
 
