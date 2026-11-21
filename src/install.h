@@ -6,7 +6,7 @@
 
 inline constexpr wchar_t kWindowClass[] = APP_ID L".main";
 inline constexpr wchar_t kInstanceMutex[] = L"Local\\" APP_ID L".instance";
-inline constexpr wchar_t kAppUserModelId[] = APP_NAME;
+inline constexpr wchar_t kAppUserModelId[] = APP_NAME L".exe";
 inline constexpr wchar_t kManifestFile[] = L"manifest.json";
 inline constexpr wchar_t kUninstallKey[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" APP_NAME;
 
