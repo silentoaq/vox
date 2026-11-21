@@ -131,7 +131,7 @@
   "toast.commandFailed": "其他程式送來的指令沒有成功，請稍後再試",
 
   "update.ready": "新版 {version} 已經下載好，下次開 Vox 就會換成新版",
-  "update.rejected": "新版 {version} 開不起來，先繼續用目前的版本",
+  "update.rejected": "新版 {version} 裝不起來，先繼續用目前的版本",
   "update.failed": "暫時無法檢查更新",
 
   "fx.equalizer": "等化器",

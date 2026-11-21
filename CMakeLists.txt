@@ -79,24 +79,6 @@ add_custom_command(TARGET ${APP_ID} POST_BUILD
           -P "${CMAKE_SOURCE_DIR}/scripts/notices.cmake"
 )
 
-add_executable(${APP_ID}-launcher WIN32
-  src/launcher/main.cpp
-  src/launcher/setup.cpp
-  src/install.cpp
-  src/files.cpp
-  src/text.cpp
-  src/vox.rc
-)
-target_include_directories(${APP_ID}-launcher PRIVATE "${GENERATED_DIR}")
-set_target_properties(${APP_ID}-launcher PROPERTIES OUTPUT_NAME "${APP_NAME}" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/launcher")
-target_link_libraries(${APP_ID}-launcher PRIVATE comctl32 shell32 shlwapi ole32 propsys windowsapp advapi32)
-target_compile_definitions(${APP_ID}-launcher PRIVATE
-  APP_NAME=L"${APP_NAME}"
-  APP_ID=L"${APP_ID}"
-  UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX
-)
-target_compile_options(${APP_ID}-launcher PRIVATE /utf-8 /W4 /permissive- /EHsc)
-
 set(ORT_DIR "${CMAKE_SOURCE_DIR}/deps/onnxruntime")
 set(ORT_NATIVE "${ORT_DIR}/runtimes/win-x64/native")
 

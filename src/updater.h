@@ -10,6 +10,8 @@ struct UpdateStatus {
   std::wstring message;
 };
 
+bool launchStagedUpdate();
+
 class Updater {
 public:
   using Notify = std::function<void(const UpdateStatus&)>;
@@ -23,6 +25,6 @@ public:
 
 private:
   std::shared_ptr<Shared> shared_;
-  std::optional<std::wstring> root_;
+  std::optional<std::wstring> dir_;
   bool checked_ = false;
 };

@@ -5,13 +5,11 @@
 #include <wincrypt.h>
 
 #include <filesystem>
-#include <map>
 #include <mutex>
 #include <thread>
 #include <vector>
 
 #include <winrt/Windows.Data.Json.h>
-#include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/base.h>
 
 #include "files.h"
@@ -24,20 +22,24 @@ using winrt::Windows::Data::Json::JsonObject;
 namespace {
 
 constexpr wchar_t kVersion[] = L"" VOX_VERSION_STRING;
-constexpr wchar_t kVersionFolder[] = L"app-" VOX_VERSION_STRING;
+constexpr wchar_t kInstallerFile[] = L"\\VoxSetup.exe";
+constexpr wchar_t kManifestFile[] = L"\\update.json";
+constexpr wchar_t kSignatureFile[] = L"\\update.sig";
+constexpr wchar_t kAttemptedFile[] = L"\\attempted";
+constexpr wchar_t kRejectedFile[] = L"\\updateRejected";
+constexpr wchar_t kUpdatedFlag[] = L" --updated";
 constexpr DWORD kHashChunk = 1 << 20;
+
+struct Release {
+  std::wstring version;
+  std::wstring url;
+  double size = 0;
+  std::string sha256;
+};
 
 UpdateStatus failed(const std::wstring& message) { return {L"error", {}, message}; }
 
-std::wstring lastError(const std::wstring& step) { return step + L"，錯誤碼 " + std::to_wstring(GetLastError()); }
-
-std::optional<std::wstring> installedRoot() {
-  const std::filesystem::path dir(exeDir());
-  if (dir.filename() != kVersionFolder) return std::nullopt;
-  const std::wstring root = dir.parent_path().wstring();
-  if (!readMarker(root, kCurrentMarker)) return std::nullopt;
-  return root;
-}
+std::wstring stagingDir() { return appDataDir() + L"\\update"; }
 
 std::vector<int> versionParts(const std::wstring& text) {
   std::vector<int> parts;
@@ -99,10 +101,20 @@ std::optional<std::string> fileSha256(const std::wstring& path) {
   return hash.hex();
 }
 
-std::string bytesSha256(const std::string& bytes) {
-  Sha256 hash;
-  hash.add(bytes.data(), bytes.size());
-  return hash.hex();
+std::optional<std::string> readBytes(const std::wstring& path) {
+  HANDLE file = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+  if (file == INVALID_HANDLE_VALUE) return std::nullopt;
+  LARGE_INTEGER size{};
+  std::string bytes;
+  DWORD read = 0;
+  bool ok = GetFileSizeEx(file, &size);
+  if (ok) {
+    bytes.resize(size_t(size.QuadPart));
+    ok = ReadFile(file, bytes.data(), DWORD(bytes.size()), &read, nullptr) && read == bytes.size();
+  }
+  CloseHandle(file);
+  if (!ok) return std::nullopt;
+  return bytes;
 }
 
 bool signatureValid(const std::string& message, const std::string& signature) {
@@ -124,44 +136,28 @@ bool signatureValid(const std::string& message, const std::string& signature) {
   return valid;
 }
 
-bool safeRelativePath(const std::wstring& path) {
-  if (path.empty() || path.find_first_of(L"\\:") != std::wstring::npos) return false;
-  size_t start = 0;
-  while (start <= path.size()) {
-    size_t slash = path.find(L'/', start);
-    if (slash == std::wstring::npos) slash = path.size();
-    const std::wstring part = path.substr(start, slash - start);
-    if (part.empty() || part == L"." || part == L"..") return false;
-    start = slash + 1;
-  }
-  return true;
+std::optional<Release> releaseOf(const std::string& manifest, const std::string& signature) {
+  if (!signatureValid(manifest, signature)) return std::nullopt;
+  JsonObject parsed = JsonObject::Parse(winrt::to_hstring(manifest));
+  JsonObject installer = parsed.GetNamedObject(L"installer");
+  Release release{std::wstring(parsed.GetNamedString(L"version")), std::wstring(installer.GetNamedString(L"url")),
+                  installer.GetNamedNumber(L"size"), winrt::to_string(installer.GetNamedString(L"sha256"))};
+  if (!isVersionText(release.version)) return std::nullopt;
+  return release;
 }
 
-std::wstring nativePath(std::wstring path) {
-  for (wchar_t& c : path)
-    if (c == L'/') c = L'\\';
-  return path;
+std::optional<Release> stagedRelease() {
+  auto manifest = readBytes(stagingDir() + kManifestFile);
+  auto signature = readBytes(stagingDir() + kSignatureFile);
+  if (!manifest || !signature) return std::nullopt;
+  return releaseOf(*manifest, *signature);
 }
 
-std::wstring writeFile(const std::wstring& path, const std::string& bytes) {
-  HANDLE file = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0, nullptr);
-  if (file == INVALID_HANDLE_VALUE) return lastError(L"寫不了 " + path);
-  DWORD written = 0;
-  const bool ok = WriteFile(file, bytes.data(), DWORD(bytes.size()), &written, nullptr) && written == bytes.size();
-  std::wstring error = ok ? std::wstring() : lastError(L"寫不了 " + path);
-  CloseHandle(file);
-  return error;
-}
+bool stagedInstallerValid(const Release& release) { return fileSha256(stagingDir() + kInstallerFile) == release.sha256; }
 
-std::map<std::wstring, std::string> ownHashes() {
-  std::map<std::wstring, std::string> hashes;
-  auto text = readUtf8File(exeDir() + L"\\" + kManifestFile);
-  if (!text) return hashes;
-  for (const auto& value : JsonObject::Parse(*text).GetNamedArray(L"files")) {
-    JsonObject file = value.GetObject();
-    hashes[std::wstring(file.GetNamedString(L"path"))] = winrt::to_string(file.GetNamedString(L"sha256"));
-  }
-  return hashes;
+void removeStaging() {
+  std::error_code error;
+  std::filesystem::remove_all(stagingDir(), error);
 }
 
 std::optional<std::string> download(const std::wstring& url, std::wstring& error) {
@@ -172,64 +168,56 @@ std::optional<std::string> download(const std::wstring& url, std::wstring& error
   return std::nullopt;
 }
 
-UpdateStatus stage(const std::wstring& root, const std::wstring& version, const JsonObject& manifest, const std::string& bytes) {
-  const std::wstring staging = versionDir(root, version) + L".partial";
-  std::filesystem::create_directories(staging);
-  const auto own = ownHashes();
-  for (const auto& value : manifest.GetNamedArray(L"files")) {
-    JsonObject file = value.GetObject();
-    const std::wstring path(file.GetNamedString(L"path"));
-    if (!safeRelativePath(path)) return failed(L"更新資訊裡有不合法的檔案路徑：" + path);
-    const std::string sha = winrt::to_string(file.GetNamedString(L"sha256"));
-    const std::wstring target = staging + L"\\" + nativePath(path);
-    std::filesystem::create_directories(std::filesystem::path(target).parent_path());
-    if (GetFileAttributesW(target.c_str()) != INVALID_FILE_ATTRIBUTES) {
-      if (fileSha256(target) == sha) continue;
-      DeleteFileW(target.c_str());
-    }
-    if (auto found = own.find(path); found != own.end() && found->second == sha) {
-      if (!CreateHardLinkW(target.c_str(), (exeDir() + L"\\" + nativePath(path)).c_str(), nullptr))
-        return failed(lastError(L"更新失敗：連結不了 " + path));
-      continue;
-    }
-    std::wstring error;
-    auto body = download(std::wstring(file.GetNamedString(L"url")), error);
-    if (!body) return failed(L"更新失敗：下載 " + path + L" 失敗，" + error);
-    if (double(body->size()) != file.GetNamedNumber(L"size") || bytesSha256(*body) != sha)
-      return failed(L"更新失敗：" + path + L" 的內容跟更新資訊對不上");
-    if (std::wstring failure = writeFile(target, *body); !failure.empty()) return failed(L"更新失敗：" + failure);
-  }
-  if (std::wstring failure = writeFile(staging + L"\\" + kManifestFile, bytes); !failure.empty())
-    return failed(L"更新失敗：" + failure);
-
-  if (auto previous = readMarker(root, kPendingMarker); previous && *previous != version) {
-    removeMarker(root, kPendingMarker);
-    removeTree(versionDir(root, *previous));
-  }
-  const std::wstring target = versionDir(root, version);
-  if (std::wstring failure = removeTree(target); !failure.empty()) return failed(L"更新失敗：" + failure);
-  if (!MoveFileExW(staging.c_str(), target.c_str(), 0)) return failed(lastError(L"更新失敗：搬不動 " + staging));
-  writeMarker(root, kPendingMarker, version);
-  return {L"ready", version, {}};
-}
-
-UpdateStatus check(const std::wstring& root) {
+UpdateStatus check() {
   std::wstring error;
-  auto manifest = download(VOX_UPDATE_URL L"/manifest.json", error);
+  auto manifest = download(VOX_UPDATE_URL L"/update.json", error);
   if (!manifest) return failed(L"檢查更新失敗：" + error);
-  auto signature = download(VOX_UPDATE_URL L"/manifest.sig", error);
+  auto signature = download(VOX_UPDATE_URL L"/update.sig", error);
   if (!signature) return failed(L"檢查更新失敗：" + error);
-  if (!signatureValid(*manifest, *signature)) return failed(L"更新資訊的簽章不對，這次不更新");
+  auto release = releaseOf(*manifest, *signature);
+  if (!release) return failed(L"更新資訊的簽章或版本號不對，這次不更新");
+  if (!newer(release->version, kVersion)) {
+    removeStaging();
+    return {};
+  }
+  if (readUtf8File(appDataDir() + kRejectedFile) == release->version) return {};
+  if (auto staged = stagedRelease(); staged && staged->version == release->version && stagedInstallerValid(*staged))
+    return {L"ready", release->version, {}};
 
-  JsonObject parsed = JsonObject::Parse(winrt::to_hstring(*manifest));
-  const std::wstring version(parsed.GetNamedString(L"version"));
-  if (!isVersionText(version)) return failed(L"更新資訊的版本號不對：" + version);
-  if (!newer(version, kVersion)) return {};
-  if (readMarker(root, kRejectedMarker) == version) return {L"rejected", version, {}};
-  if (readMarker(root, kPendingMarker) == version) return {L"ready", version, {}};
-  return stage(root, version, parsed, *manifest);
+  removeStaging();
+  std::filesystem::create_directories(stagingDir());
+  const std::wstring installer = stagingDir() + kInstallerFile;
+  const std::wstring partial = installer + L".partial";
+  if (std::wstring failure = httpDownload(release->url, partial); !failure.empty()) return failed(L"下載新版失敗：" + failure);
+  if (double(std::filesystem::file_size(partial)) != release->size || fileSha256(partial) != release->sha256)
+    return failed(L"下載的新版跟更新資訊對不上");
+  if (!MoveFileExW(partial.c_str(), installer.c_str(), MOVEFILE_REPLACE_EXISTING))
+    return failed(L"新版存不起來，錯誤碼 " + std::to_wstring(GetLastError()));
+  writeBytesFile(stagingDir() + kSignatureFile, *signature);
+  writeBytesFile(stagingDir() + kManifestFile, *manifest);
+  return {L"ready", release->version, {}};
 }
 
+}
+
+bool launchStagedUpdate() {
+  auto release = stagedRelease();
+  if (!release) return false;
+  if (!newer(release->version, kVersion)) {
+    removeStaging();
+    return false;
+  }
+  if (readUtf8File(stagingDir() + kAttemptedFile) == release->version || !stagedInstallerValid(*release)) return false;
+  writeUtf8File(stagingDir() + kAttemptedFile, release->version);
+  const std::wstring installer = stagingDir() + kInstallerFile;
+  std::wstring commandLine = L"\"" + installer + L"\"" + kUpdatedFlag;
+  STARTUPINFOW startup{sizeof startup};
+  PROCESS_INFORMATION process{};
+  if (!CreateProcessW(installer.c_str(), commandLine.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startup, &process))
+    return false;
+  CloseHandle(process.hThread);
+  CloseHandle(process.hProcess);
+  return true;
 }
 
 struct Updater::Shared {
@@ -238,7 +226,7 @@ struct Updater::Shared {
   Notify notify;
 };
 
-Updater::Updater(Notify notify) : shared_(std::make_shared<Shared>()), root_(installedRoot()) {
+Updater::Updater(Notify notify) : shared_(std::make_shared<Shared>()), dir_(installedDir()) {
   shared_->notify = std::move(notify);
 }
 
@@ -248,21 +236,18 @@ Updater::~Updater() {
 }
 
 void Updater::started() {
-  if (!root_) return;
-  if (readMarker(*root_, kTryingMarker) == kVersion) {
-    writeMarker(*root_, kCurrentMarker, kVersion);
-    removeMarker(*root_, kTryingMarker);
-    for (const std::wstring& error :
-         {installLauncher(*root_, kVersion), recordInstalledVersion(kVersion), removeVersionsExcept(*root_, kVersion)})
-      if (!error.empty()) OutputDebugStringW((error + L"\n").c_str());
-  }
-  if (checked_) return;
+  if (!dir_ || checked_) return;
   checked_ = true;
-  std::thread([shared = shared_, root = *root_] {
+  if (auto staged = stagedRelease(); staged && readUtf8File(stagingDir() + kAttemptedFile) == staged->version) {
+    writeUtf8File(appDataDir() + kRejectedFile, staged->version);
+    removeStaging();
+    shared_->notify({L"rejected", staged->version, {}});
+  }
+  std::thread([shared = shared_] {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
     UpdateStatus status;
     try {
-      status = check(root);
+      status = check();
     } catch (const winrt::hresult_error& e) {
       status = failed(L"更新失敗：" + std::wstring(e.message()));
     } catch (const std::filesystem::filesystem_error& e) {

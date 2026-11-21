@@ -137,7 +137,7 @@
   "toast.commandFailed": "A command from another program didn't go through. Try again later.",
 
   "update.ready": "Version {version} is downloaded and will be used the next time you open Vox",
-  "update.rejected": "Version {version} failed to start. Staying on the current version.",
+  "update.rejected": "Version {version} couldn't be installed. Staying on the current version.",
   "update.failed": "Can't check for updates right now",
 
   "fx.equalizer": "Equalizer",

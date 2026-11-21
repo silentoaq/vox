@@ -9,6 +9,7 @@
 #include "install.h"
 #include "link.h"
 #include "mainWindow.h"
+#include "updater.h"
 
 namespace {
 
@@ -56,6 +57,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
 
   SetCurrentProcessExplicitAppUserModelID(kAppUserModelId);
   winrt::init_apartment(winrt::apartment_type::single_threaded);
+  if (auto dir = installedDir()) {
+    repairLinkRegistration(*dir);
+    if (arg.empty() && launchStagedUpdate()) return 0;
+  }
 
   MainWindow window(instance);
   if (!arg.empty()) window.openLink(arg);

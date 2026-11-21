@@ -22,8 +22,8 @@ Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所�
 
 - 需要 Windows 10 或 11（64 位元）和 WebView2 Runtime。Windows 11 內建，Windows 10 大多也已經有，沒有的話到[微軟的下載頁](https://developer.microsoft.com/microsoft-edge/webview2/)裝。
 - 不需要系統管理員權限。預設裝在 `%LOCALAPPDATA%\Programs\Vox`，安裝時可以改位置。
-- 之後會自動更新：開 Vox 時在背景下載新版，下次開就換成新版。新版開不起來會自動換回舊版。
-- 解除安裝在 Windows 的「應用程式」裡。預設會留下收藏、歌單、播放紀錄和登入資料，勾選「一併刪除」才會清掉。
+- 之後會自動更新：開 Vox 時在背景下載新版的安裝程式，下次開 Vox 會先裝好新版再打開。
+- 解除安裝在 Windows 的「應用程式」裡。最後會問要不要一併刪除收藏、歌單、播放紀錄和登入資料，選「否」就保留。
 
 ## 登入是選用的
 
@@ -96,17 +96,18 @@ cmake --build build --config Release --target vox vox-separate
 build\Release\Vox.exe
 ```
 
-`scripts\deps.ps1` 會把 WebView2 SDK、ONNX Runtime、Opus 等相依元件和伴唱模型下載到 `deps\`。開發時加 `-DVOX_DEVTOOLS=ON` 可以開 DevTools。
+`scripts\deps.ps1` 會把 WebView2 SDK、ONNX Runtime、Opus、NSIS 等相依元件和伴唱模型下載到 `deps\`。開發時加 `-DVOX_DEVTOOLS=ON` 可以開 DevTools。
 
-程式分三塊：
+程式分四塊：
 
-- `src\`：視窗、WebView2、帳號、桌面歌詞、媒體控制、更新。`src\launcher\` 是啟動器，也負責安裝和解除安裝。
+- `src\`：視窗、WebView2、帳號、桌面歌詞、媒體控制、更新。
 - `separate\`：人聲分離，獨立的執行檔。
 - `ui\`：畫面，沒有建置步驟的 HTML、CSS、JavaScript。
+- `scripts\installer.nsi`：NSIS 安裝程式，也負責解除安裝。
 
 ### 翻譯
 
-畫面上的字在 `ui\locales\*.json`，原生視窗（桌面歌詞、安裝程式）的字在 `src\text.h`。各地用當地慣用的說法，不是逐字轉換。改完跑一次檢查，三種語言的句子和參數要對得上：
+畫面上的字在 `ui\locales\*.json`，原生視窗（桌面歌詞、系統匣）的字在 `src\text.h`，安裝程式的字在 `scripts\installer.nsi`。各地用當地慣用的說法，不是逐字轉換。改完跑一次檢查，三種語言的句子和參數要對得上：
 
 ```
 python scripts\checkLocales.py
@@ -134,9 +135,9 @@ python scripts\halfWeights.py core.onnx deps\models\demucs-hdemucs_mmi-10s.onnx
 powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 ```
 
-這會建置、列出每個檔案的雜湊、簽章、組出 `VoxSetup.exe`，再用 `wrangler` 傳到 Cloudflare R2。不加 `-Bucket` 就只產生上傳資料夾，裡面的 `latest\` 和 `files\` 照原樣放到任何靜態主機都可以。
+這會建置、用 NSIS 打包成 `VoxSetup.exe`、把安裝程式的雜湊寫進 `update.json` 並簽章，再用 `wrangler` 傳到 Cloudflare R2，最後打標籤、建 GitHub Release。不加 `-Bucket` 就只產生上傳資料夾，裡面的 `latest\` 和 `files\` 照原樣放到任何靜態主機都可以。
 
-版本號是發版當天的日期，像 `2026.11.16`，同一天再發一次就是 `2026.11.16.1`，腳本自己算。更新網址改 `CMakeLists.txt` 的 `VOX_UPDATE_URL`。
+版本號是發版當天的日期，像 `2026.11.16`，同一天再發一次就是 `2026.11.16.1`，腳本照 git 標籤自己算。更新網址改 `CMakeLists.txt` 的 `VOX_UPDATE_URL`。
 
 ## 資料放在哪裡
 
@@ -145,6 +146,7 @@ powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 | 收藏、歌單、播放紀錄、設定 | `%LOCALAPPDATA%\Vox` |
 | 登入資料 | `%LOCALAPPDATA%\Vox\WebView2` |
 | 分離好的伴奏 | `%LOCALAPPDATA%\Vox\stems` |
+| 下載好、還沒裝的新版 | `%LOCALAPPDATA%\Vox\update` |
 
 ## 授權
 

@@ -34,7 +34,18 @@ function Get-Source($url, $folder) {
 Get-Source 'https://github.com/xiph/opus/releases/download/v1.5.2/opus-1.5.2.tar.gz' 'opus'
 Get-Source 'https://downloads.xiph.org/releases/opus/libopusenc-0.2.1.tar.gz' 'libopusenc'
 
-$modelHash = '82ea615e76d59b5610e56643040db66fb033ea70a8c876d57e1899f3c9bbf2e3'
+$nsisHash = 'c7d27f780ddb6cffb4730138cd1591e841f4b7edb155856901cdf5f214394fa1'
+$nsisArchive = Join-Path $deps 'nsis.zip'
+$nsis = Join-Path $deps 'nsis'
+curl.exe -sSfL -o $nsisArchive 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11.zip'
+if ($LASTEXITCODE -ne 0) { throw '下載 NSIS 失敗' }
+if ((Get-FileHash -Algorithm SHA256 $nsisArchive).Hash -ne $nsisHash) { throw "$nsisArchive 的內容不對" }
+if (Test-Path $nsis) { Remove-Item -Recurse -Force $nsis }
+Expand-Archive $nsisArchive -DestinationPath $deps
+Rename-Item (Join-Path $deps 'nsis-3.11') 'nsis'
+Remove-Item $nsisArchive
+
+$modelHash ='82ea615e76d59b5610e56643040db66fb033ea70a8c876d57e1899f3c9bbf2e3'
 $models = Join-Path $deps 'models'
 $model = Join-Path $models 'demucs-hdemucs_mmi-10s.onnx'
 New-Item -ItemType Directory -Force $models | Out-Null

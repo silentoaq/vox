@@ -3,7 +3,12 @@
 #include <windows.h>
 #include <winhttp.h>
 
+#include <functional>
+#include <vector>
+
 namespace {
+
+constexpr DWORD kReadChunk = 1 << 20;
 
 constexpr wchar_t kUserAgent[] =
   L"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
@@ -57,14 +62,7 @@ bool crack(const std::wstring& url, UrlParts& out) {
   return true;
 }
 
-}
-
-std::wstring hostOf(const std::wstring& url) {
-  UrlParts parts;
-  return crack(url, parts) ? parts.host : std::wstring();
-}
-
-HttpResponse httpFetch(const HttpRequest& request) {
+HttpResponse httpExchange(const HttpRequest& request, const std::function<bool(const char*, DWORD)>& sink) {
   UrlParts parts;
   if (!crack(request.url, parts)) return failure(L"解析網址");
 
@@ -95,12 +93,42 @@ HttpResponse httpFetch(const HttpRequest& request) {
                       &status, &size, WINHTTP_NO_HEADER_INDEX);
   response.status = status;
 
-  char buffer[65536];
+  std::vector<char> buffer(kReadChunk);
   for (;;) {
     DWORD read = 0;
-    if (!WinHttpReadData(req.get(), buffer, sizeof buffer, &read)) return failure(L"讀取回應");
+    if (!WinHttpReadData(req.get(), buffer.data(), DWORD(buffer.size()), &read)) return failure(L"讀取回應");
     if (read == 0) break;
-    response.body.append(buffer, read);
+    if (!sink(buffer.data(), read)) return failure(L"寫入回應");
   }
   return response;
+}
+
+}
+
+std::wstring hostOf(const std::wstring& url) {
+  UrlParts parts;
+  return crack(url, parts) ? parts.host : std::wstring();
+}
+
+HttpResponse httpFetch(const HttpRequest& request) {
+  std::string body;
+  HttpResponse response = httpExchange(request, [&body](const char* data, DWORD size) {
+    body.append(data, size);
+    return true;
+  });
+  response.body = std::move(body);
+  return response;
+}
+
+std::wstring httpDownload(const std::wstring& url, const std::wstring& path) {
+  HANDLE file = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0, nullptr);
+  if (file == INVALID_HANDLE_VALUE) return L"寫不了 " + path + L"，錯誤碼 " + std::to_wstring(GetLastError());
+  HttpResponse response = httpExchange({L"GET", url, {}, {}}, [file](const char* data, DWORD size) {
+    DWORD written = 0;
+    return WriteFile(file, data, size, &written, nullptr) && written == size;
+  });
+  CloseHandle(file);
+  if (!response.error.empty()) return response.error;
+  if (response.status != 200) return L"伺服器回 " + std::to_wstring(response.status);
+  return {};
 }

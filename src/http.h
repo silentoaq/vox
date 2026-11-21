@@ -18,3 +18,4 @@ struct HttpResponse {
 
 std::wstring hostOf(const std::wstring& url);
 HttpResponse httpFetch(const HttpRequest& request);
+std::wstring httpDownload(const std::wstring& url, const std::wstring& path);
