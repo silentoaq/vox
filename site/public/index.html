@@ -54,9 +54,6 @@ img { display: block; max-width: 100%; }
 .frames img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--line); background: var(--field); }
 .frames figcaption { display: flex; gap: 10px; align-items: baseline; font-size: 17px; font-weight: 700; }
 .frames figcaption span { color: var(--brand); font-size: 14px; }
-.steps { display: grid; gap: 10px; margin-top: 16px; list-style: none; counter-reset: step; }
-.steps li { display: flex; gap: 10px; align-items: baseline; font-size: 17px; font-weight: 700; counter-increment: step; }
-.steps li::before { content: counter(step); color: var(--brand); font-size: 14px; }
 .stop__note { margin-top: 16px; color: var(--ink-2); }
 .stop--done .stop__n { background: var(--brand); color: var(--brand-ink); }
 .stop--done .stop__body { display: grid; gap: 14px; justify-items: start; padding-bottom: 0; }
@@ -109,13 +106,13 @@ img { display: block; max-width: 100%; }
       <div class="stop__rail"><span class="stop__n">1</span></div>
       <div class="stop__body">
         <h2>Edge 右上角顯示「不常下載」</h2>
-        <ol class="steps">
-          <li>滑鼠移到檔案上，按「…」</li>
-          <li>選「保留」</li>
-          <li>按「刪除」旁的箭頭</li>
-          <li>選「仍要保留」</li>
-          <li>按「開啟檔案」</li>
-        </ol>
+        <div class="frames">
+          <figure><img src="/assets/e1.webp" alt="Edge 下載清單，框出檔案右邊的三個點" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>1</span>滑鼠移到檔案上，按「…」</figcaption></figure>
+          <figure><img src="/assets/e2.webp" alt="三個點打開的選單，框出保留" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>2</span>選「保留」</figcaption></figure>
+          <figure><img src="/assets/e3.webp" alt="開啟之前請確定您信任的視窗，框出刪除旁邊的箭頭" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>3</span>按「刪除」旁的箭頭</figcaption></figure>
+          <figure><img src="/assets/e4.webp" alt="刪除下方展開的選項，框出仍要保留" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>4</span>選「仍要保留」</figcaption></figure>
+          <figure><img src="/assets/e5.webp" alt="Edge 下載清單裡的安裝檔已保留，框出開啟檔案" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>5</span>按「開啟檔案」</figcaption></figure>
+        </div>
         <p class="stop__note">不要按「刪除」，檔案會被丟掉。</p>
       </div>
     </li>
@@ -123,10 +120,10 @@ img { display: block; max-width: 100%; }
       <div class="stop__rail"><span class="stop__n">1</span></div>
       <div class="stop__body">
         <h2>在 Chrome 打開剛下載的安裝檔</h2>
-        <ol class="steps">
-          <li>按網址列右邊的下載圖示</li>
-          <li>按「VoxSetup.exe」</li>
-        </ol>
+        <div class="frames">
+          <figure><img src="/assets/c1.webp" alt="Chrome 網址列右邊的下載圖示，紅框標 1" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>1</span>按網址列右邊的下載圖示</figcaption></figure>
+          <figure><img src="/assets/c2.webp" alt="Chrome 的近期下載記錄，紅框標 2 的 VoxSetup.exe" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>2</span>按「VoxSetup.exe」</figcaption></figure>
+        </div>
       </div>
     </li>
     <li class="stop">
