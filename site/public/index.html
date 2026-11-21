@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>下載 Vox</title>
+<meta name="description" content="Vox 是 Windows 上的桌面 KTV 播放器，歌來自 YouTube Music 和 Spotify，歌詞逐字跟著唱。">
+<link rel="icon" href="/assets/vox.webp">
+<style>
+:root {
+  --bg: #0d0d10;
+  --panel: #141418;
+  --field: #0a0a0d;
+  --line: #2b2b33;
+  --ink: #f4f4f5;
+  --ink-2: #babac2;
+  --brand: #3ad38a;
+  --brand-ink: #04140c;
+  --danger: #ff8a80;
+  --font: "Microsoft JhengHei UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--font); }
+body { background: var(--bg); }
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 24px; }
+.dl { padding-top: 56px; padding-bottom: 104px; }
+.dl__head { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.dl__icon { width: 72px; height: 72px; }
+.dl__title { flex: 1; min-width: 240px; }
+.h1 { font-size: clamp(32px, 4.6vw, 56px); font-weight: 900; line-height: 1.15; }
+.dl__sub { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 28px; color: var(--ink-2); }
+.textlink { color: var(--brand); font-weight: 700; text-decoration: none; }
+.textlink:hover { color: var(--ink); }
+.dl__why { margin-top: 28px; font-size: 18px; color: var(--ink-2); text-wrap: balance; }
+.dl__why b { color: var(--ink); }
+.pick { display: flex; align-items: center; gap: 14px; margin-top: 28px; }
+.pick__label { color: var(--ink-2); font-size: 14px; }
+.seg { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 4px; background: var(--field); }
+.seg button { background: none; border: 0; border-radius: 3px; color: var(--ink-2); font: inherit; font-size: 15px; padding: 6px 18px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); font-weight: 700; }
+.path { list-style: none; margin-top: 40px; }
+.stop { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 24px; }
+.stop[hidden] { display: none; }
+.stop__rail { display: grid; grid-template-rows: 44px 1fr; justify-items: center; }
+.stop__n { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--brand); border-radius: 4px; background: var(--field); color: var(--brand); font-size: 20px; font-weight: 900; }
+.stop__rail::after { content: ""; width: 1px; background: linear-gradient(var(--brand), color-mix(in oklab, var(--brand) 20%, transparent)); }
+.stop:last-child .stop__rail::after { display: none; }
+.stop__body { padding-bottom: 56px; min-width: 0; }
+.stop__body h2 { font-size: 24px; font-weight: 900; line-height: 44px; }
+.frames { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 16px; margin-top: 16px; }
+.frames figure { display: grid; gap: 10px; align-content: start; }
+.frames img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--line); background: var(--field); }
+.frames figcaption { display: flex; gap: 10px; align-items: baseline; font-size: 17px; font-weight: 700; }
+.frames figcaption span { color: var(--brand); font-size: 14px; }
+.steps { display: grid; gap: 10px; margin-top: 16px; list-style: none; counter-reset: step; }
+.steps li { display: flex; gap: 10px; align-items: baseline; font-size: 17px; font-weight: 700; counter-increment: step; }
+.steps li::before { content: counter(step); color: var(--brand); font-size: 14px; }
+.stop__note { margin-top: 16px; color: var(--ink-2); }
+.stop--done .stop__n { background: var(--brand); color: var(--brand-ink); }
+.stop--done .stop__body { display: grid; gap: 14px; justify-items: start; padding-bottom: 0; }
+.stop--done p { color: var(--ink-2); font-size: 18px; }
+.btn { display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 24px 0 28px; border-radius: 4px; background: var(--brand); color: var(--brand-ink); font-size: 17px; font-weight: 700; text-decoration: none; }
+.btn:hover { background: color-mix(in oklab, var(--brand) 82%, #fff); }
+.detour { margin-top: 24px; padding-top: 48px; border-top: 1px solid var(--line); }
+.stop__n--alert { border-color: var(--danger); color: var(--danger); }
+.warn { color: var(--danger); font-weight: 700; margin-top: 14px; }
+.safe { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink-2); }
+@media (max-width: 900px) {
+  .frames { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .wrap { padding-inline: 16px; }
+  .dl { padding-top: 32px; }
+  .stop { grid-template-columns: 36px minmax(0, 1fr); gap: 14px; }
+  .stop__rail { grid-template-rows: 36px 1fr; }
+  .stop__n { width: 36px; height: 36px; font-size: 17px; }
+  .stop__body h2 { font-size: 20px; line-height: 36px; }
+  .frames { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<main class="wrap dl">
+  <header class="dl__head">
+    <img class="dl__icon" src="/assets/vox.webp" alt="" width="128" height="128">
+    <div class="dl__title">
+      <h1 class="h1">Vox 開始下載了</h1>
+      <p class="dl__sub">
+        <span>沒有開始？<a class="textlink" href="/latest/VoxSetup.exe">重新下載</a></span>
+        <span>Windows 10、11</span>
+      </p>
+    </div>
+  </header>
+
+  <p class="dl__why">安裝檔還沒有數位簽章，瀏覽器和 Windows 會跳出提醒。<b>照順序按紅框圈起來的地方</b>就裝好了。</p>
+
+  <p class="pick">
+    <span class="pick__label">你的瀏覽器</span>
+    <span class="seg" role="group">
+      <button type="button" data-browser="edge" aria-pressed="true">Edge</button>
+      <button type="button" data-browser="chrome" aria-pressed="false">Chrome</button>
+    </span>
+  </p>
+
+  <ol class="path">
+    <li class="stop" data-for="edge">
+      <div class="stop__rail"><span class="stop__n">1</span></div>
+      <div class="stop__body">
+        <h2>Edge 右上角顯示「不常下載」</h2>
+        <ol class="steps">
+          <li>滑鼠移到檔案上，按「…」</li>
+          <li>選「保留」</li>
+          <li>按「刪除」旁的箭頭</li>
+          <li>選「仍要保留」</li>
+          <li>按「開啟檔案」</li>
+        </ol>
+        <p class="stop__note">不要按「刪除」，檔案會被丟掉。</p>
+      </div>
+    </li>
+    <li class="stop" data-for="chrome" hidden>
+      <div class="stop__rail"><span class="stop__n">1</span></div>
+      <div class="stop__body">
+        <h2>在 Chrome 打開剛下載的安裝檔</h2>
+        <ol class="steps">
+          <li>按網址列右邊的下載圖示</li>
+          <li>按「VoxSetup.exe」</li>
+        </ol>
+      </div>
+    </li>
+    <li class="stop">
+      <div class="stop__rail"><span class="stop__n">2</span></div>
+      <div class="stop__body">
+        <h2>如果跳出藍色的「Windows 已保護您的電腦」</h2>
+        <div class="frames">
+          <figure><img src="/assets/s1.webp" alt="藍色的 Windows 已保護您的電腦視窗，框出其他資訊" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>1</span>按「其他資訊」</figcaption></figure>
+          <figure><img src="/assets/s2.webp" alt="展開後顯示 VoxSetup.exe 和不明的發行者，框出仍要執行" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>2</span>按「仍要執行」</figcaption></figure>
+        </div>
+      </div>
+    </li>
+    <li class="stop">
+      <div class="stop__rail"><span class="stop__n">3</span></div>
+      <div class="stop__body">
+        <h2>跳出 Vox 安裝程式</h2>
+        <div class="frames">
+          <figure><img src="/assets/i1.webp" alt="Vox 安裝程式的選取安裝位置頁面，框出安裝" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>1</span>按「安裝」</figcaption></figure>
+          <figure><img src="/assets/i2.webp" alt="即將完成安裝 Vox 的頁面，框出完成" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>2</span>按「完成」</figcaption></figure>
+        </div>
+      </div>
+    </li>
+    <li class="stop stop--done">
+      <div class="stop__rail"><span class="stop__n">4</span></div>
+      <div class="stop__body">
+        <h2>Vox 打開了</h2>
+        <p>登入 YouTube Music 或 Spotify 就能開始點歌。</p>
+        <a class="btn" href="https://github.com/silentoaq/vox#readme">看使用說明<svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M224.49 136.49l-72 72a12 12 0 0 1-17-17L187 140H40a12 12 0 0 1 0-24h147l-51.49-51.51a12 12 0 0 1 17-17l72 72a12 12 0 0 1-.02 17z"/></svg></a>
+      </div>
+    </li>
+  </ol>
+
+  <section class="detour">
+    <div class="stop">
+      <div class="stop__rail"><span class="stop__n stop__n--alert">!</span></div>
+      <div class="stop__body">
+        <h2>Windows 11 擋下 Vox，沒有「仍要執行」</h2>
+        <p class="stop__note">這是「智慧型應用程式控制」，要先關閉。Windows 10 不會遇到。</p>
+        <div class="frames">
+          <figure><img src="/assets/w0.webp" alt="智慧型應用程式控制已封鎖可能不安全的應用程式" width="900" height="600" loading="lazy" decoding="async"><figcaption>跳出的是這個畫面</figcaption></figure>
+          <figure><img src="/assets/w1.webp" alt="Windows 11 設定，框出左邊的隱私權與安全性" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>1</span>打開「設定」，按「隱私權與安全性」</figcaption></figure>
+          <figure><img src="/assets/w2.webp" alt="隱私權與安全性頁面，框出 Windows 安全性" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>2</span>按「Windows 安全性」</figcaption></figure>
+          <figure><img src="/assets/w3.webp" alt="Windows 安全性的保護區域，框出應用程式與瀏覽器控制" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>3</span>按「應用程式與瀏覽器控制」</figcaption></figure>
+          <figure><img src="/assets/w4.webp" alt="應用程式與瀏覽器控制頁面，框出智慧型應用程式控制設定" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>4</span>按「智慧型應用程式控制設定」</figcaption></figure>
+          <figure><img src="/assets/w5.webp" alt="智慧型應用程式控制的選項，框出關閉" width="900" height="600" loading="lazy" decoding="async"><figcaption><span>5</span>選「關閉」，再重新打開安裝檔</figcaption></figure>
+        </div>
+        <p class="warn">舊版 Windows 11 關閉後開不回來，要重設 Windows 才會恢復。</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="safe">只從 vox.lichitdev.com 或 GitHub 的 silentoaq/vox 下載。從別處拿到的安裝檔，不要略過這些提醒。</p>
+</main>
+<script>
+document.querySelectorAll('[data-browser]').forEach((button) => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('[data-browser]').forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
+    document.querySelectorAll('[data-for]').forEach((stop) => { stop.hidden = stop.dataset.for !== button.dataset.browser; });
+  });
+});
+location.assign('/latest/VoxSetup.exe');
+</script>
+</body>
+</html>
