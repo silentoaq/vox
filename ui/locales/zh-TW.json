@@ -102,6 +102,8 @@
   "error.playback": "暫時無法播放，請稍後再試",
 
   "karaoke.skipWait": "不等了，直接播原唱",
+  "karaoke.warning": "效能比較差的電腦開伴唱會卡，不建議開。",
+  "karaoke.turnOn": "開啟伴唱",
   "karaoke.phase.installing": "下載工具",
   "karaoke.phase.preparing": "取得音訊",
   "karaoke.phase.downloading": "下載音訊 {percent}%",
@@ -201,9 +203,6 @@
 
   "settings.label": "帳號與設定",
   "settings.language": "語言",
-  "settings.onClose": "關閉視窗時",
-  "settings.close.tray": "收進系統匣繼續播放",
-  "settings.close.quit": "結束 Vox",
   "language.system": "跟隨系統",
   "account.title": "帳號",
   "account.optional": "登入不是必要的，不登入也能點歌、唱歌。",

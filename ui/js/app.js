@@ -86,7 +86,6 @@ let menu = null;
 let renameTimer = 0;
 let openAccount = null;
 let languageOpen = false;
-let closeToTray = true;
 let upNext = null;
 let radioFor = null;
 let preparedNext = null;
@@ -346,7 +345,6 @@ function renderAccount() {
   $('settingsToggle').classList.toggle('expired', states.some((account) => account?.state === 'expired'));
   $('accountRows').innerHTML = sources.map(accountRowHtml).join('');
   renderLanguagePicker();
-  renderCloseChoice();
   const preview = previewOnly(searchSource.id);
   $('pickHint').hidden = !preview;
   if (preview)
@@ -366,16 +364,6 @@ function renderLanguagePicker() {
         `<button class="select-option${option.id === language.setting() ? ' on' : ''}" data-language="${option.id}">${option.name}</button>`
     )
     .join('');
-}
-
-function renderCloseChoice() {
-  const seg = (value, label) => `<button class="seg${value === closeToTray ? ' on' : ''}" data-close="${value}">${label}</button>`;
-  $('closeRow').innerHTML = seg(true, t('settings.close.tray')) + seg(false, t('settings.close.quit'));
-}
-
-async function setCloseToTray(value) {
-  ({ closeToTray } = await call('window.set', { closeToTray: value }));
-  renderCloseChoice();
 }
 
 function renderLanguage() {
@@ -1402,11 +1390,6 @@ $('settings').addEventListener('click', (e) => {
     else language.choose(option.dataset.language);
     return;
   }
-  const close = e.target.closest('[data-close]');
-  if (close) {
-    setCloseToTray(close.dataset.close === 'true');
-    return;
-  }
   const target = e.target.closest('[data-act]');
   if (!target) return;
   const source = sourceOf(target.dataset.source);
@@ -1478,7 +1461,12 @@ $('vol').addEventListener('change', () => saveText(VOLUME_KEY, $('vol').value));
 $('vocal').addEventListener('input', () => applyVocal(Number($('vocal').value)));
 $('vocal').addEventListener('change', () => saveText(VOCAL_KEY, $('vocal').value));
 $('kToggle').addEventListener('click', () => {
-  karaokeOn = !karaokeOn;
+  if (karaokeOn) setKaraoke(false);
+  else ask(t('karaoke.warning'), t('karaoke.turnOn'), () => setKaraoke(true));
+});
+
+function setKaraoke(on) {
+  karaokeOn = on;
   saveFlag(KARAOKE_KEY, karaokeOn);
   karaoke.setSong(current?.source === 'ytm' ? current.id : null);
   setEmbedMuted(false);
@@ -1494,7 +1482,7 @@ $('kToggle').addEventListener('click', () => {
   renderKaraoke();
   renderNowPlaying();
   frame();
-});
+}
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.key.toLowerCase() === 'f') {
     e.preventDefault();
@@ -1612,7 +1600,6 @@ on('update', ({ state, version, message }) => {
 });
 
 function applyWindow(state) {
-  ({ closeToTray } = state);
   $('player').toggleAttribute('data-window-hidden', !state.shown);
 }
 

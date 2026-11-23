@@ -14,13 +14,6 @@
   X(LyricsDynamic, L"動態", L"动态", L"Dynamic") \
   X(LyricsWipe, L"刷色", L"刷色", L"Wipe") \
   X(LyricsLock, L"鎖定", L"锁定", L"Lock") \
-  X(TrayOpen, L"開啟 {0}", L"打开 {0}", L"Open {0}") \
-  X(TrayLyrics, L"桌面歌詞", L"桌面歌词", L"Desktop lyrics") \
-  X(TrayLockLyrics, L"鎖定桌面歌詞", L"锁定桌面歌词", L"Lock desktop lyrics") \
-  X(TrayQuit, L"結束 {0}", L"退出 {0}", L"Quit {0}") \
-  X(TrayHintTitle, L"{0} 還在背景執行", L"{0} 仍在后台运行", L"{0} is still running") \
-  X(TrayHintBody, L"按系統匣的圖示可以開啟視窗，按右鍵可以結束。", L"点击托盘图标可以打开窗口，右键点击可以退出。", \
-    L"Click the tray icon to open the window, or right-click it to quit.") \
   X(LoginTitle, L"登入 {0}", L"登录 {0}", L"Sign in to {0}") \
   X(LoginWindowFailed, L"登入視窗開不起來（0x{0}）", L"登录窗口打不开（0x{0}）", L"The sign-in window couldn't open (0x{0})") \
   X(StartFailed, L"{0} 開不起來：{1}（0x{2}）", L"{0} 无法启动：{1}（0x{2}）", L"{0} couldn't start: {1} (0x{2})") \

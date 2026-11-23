@@ -108,6 +108,8 @@
   "error.playback": "Can't play right now. Try again later.",
 
   "karaoke.skipWait": "Skip the wait and play the original",
+  "karaoke.warning": "Karaoke makes slower computers lag. It's not recommended on them.",
+  "karaoke.turnOn": "Turn on karaoke",
   "karaoke.phase.installing": "Downloading tools",
   "karaoke.phase.preparing": "Fetching audio",
   "karaoke.phase.downloading": "Downloading audio {percent}%",
@@ -207,9 +209,6 @@
 
   "settings.label": "Accounts and settings",
   "settings.language": "Language",
-  "settings.onClose": "When the window is closed",
-  "settings.close.tray": "Keep playing in the tray",
-  "settings.close.quit": "Quit Vox",
   "language.system": "System",
   "account.title": "Accounts",
   "account.optional": "Signing in is optional. You can search and sing without it.",

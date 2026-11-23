@@ -24,7 +24,6 @@ constexpr wchar_t kHostName[] = APP_ID L".localhost";
 constexpr wchar_t kStemsHostName[] = L"stems." APP_ID L".localhost";
 constexpr wchar_t kPageUrl[] = L"https://" APP_ID L".localhost/index.html";
 constexpr wchar_t kPageOrigin[] = L"https://" APP_ID L".localhost/";
-constexpr wchar_t kSettingsFile[] = L"\\window.json";
 constexpr COREWEBVIEW2_COLOR kBackground = {255, 0x0d, 0x0d, 0x10};
 constexpr int kMinWidth = 960;
 constexpr int kMinHeight = 620;
@@ -129,58 +128,14 @@ MainWindow::MainWindow(HINSTANCE instance) {
       bridge_->emit(L"update", params);
     });
   });
-  loadSettings();
-  tray_ = std::make_unique<Tray>(
-    instance, [this] { return TrayState{hasSong_, playing_, lyrics_->visible(), lyrics_->locked()}; },
-    [this](TrayCommand command) { onTray(command); });
   registerMethods();
   createWebView();
-}
-
-void MainWindow::loadSettings() {
-  auto text = readUtf8File(appDataDir() + kSettingsFile);
-  JsonObject json;
-  if (!text || !JsonObject::TryParse(*text, json)) return;
-  closeToTray_ = json.GetNamedBoolean(L"closeToTray", closeToTray_);
-  trayHinted_ = json.GetNamedBoolean(L"trayHinted", trayHinted_);
-}
-
-void MainWindow::saveSettings() {
-  JsonObject json;
-  json.SetNamedValue(L"closeToTray", JsonValue::CreateBooleanValue(closeToTray_));
-  json.SetNamedValue(L"trayHinted", JsonValue::CreateBooleanValue(trayHinted_));
-  writeUtf8File(appDataDir() + kSettingsFile, std::wstring(json.Stringify()));
 }
 
 void MainWindow::control(const std::wstring& action) {
   JsonObject params;
   params.SetNamedValue(L"action", JsonValue::CreateStringValue(action));
   bridge_->emit(L"control", params);
-}
-
-void MainWindow::onTray(TrayCommand command) {
-  switch (command) {
-    case TrayCommand::Open:
-      activate();
-      return;
-    case TrayCommand::Toggle:
-      control(L"toggle");
-      return;
-    case TrayCommand::Skip:
-      control(L"skip");
-      return;
-    case TrayCommand::Lyrics:
-      lyrics_->setVisible(!lyrics_->visible());
-      bridge_->emit(L"desktopLyricsState", desktopLyricsState());
-      return;
-    case TrayCommand::LockLyrics:
-      lyrics_->setLocked(!lyrics_->locked());
-      bridge_->emit(L"desktopLyricsState", desktopLyricsState());
-      return;
-    case TrayCommand::Quit:
-      DestroyWindow(hwnd_);
-      return;
-  }
 }
 
 Bridge::JsonObject MainWindow::desktopLyricsState() const {
@@ -207,7 +162,6 @@ Bridge::JsonObject MainWindow::languageState() const {
 
 Bridge::JsonObject MainWindow::windowState() const {
   JsonObject state;
-  state.SetNamedValue(L"closeToTray", JsonValue::CreateBooleanValue(closeToTray_));
   state.SetNamedValue(L"shown", JsonValue::CreateBooleanValue(windowShown_));
   return state;
 }
@@ -235,11 +189,6 @@ void MainWindow::registerMethods() {
     if (!chooseLanguage(setting)) throw winrt::hresult_invalid_argument(L"沒有這個語言：" + setting);
     lyrics_->languageChanged();
     return languageState();
-  });
-  bridge_->on(L"window.set", [this](const JsonObject& params) {
-    closeToTray_ = params.GetNamedBoolean(L"closeToTray");
-    saveSettings();
-    return windowState();
   });
   bridge_->on(L"nowPlaying.track", [this](const JsonObject& params) {
     const std::wstring title(params.GetNamedString(L"title"));
@@ -299,16 +248,12 @@ void MainWindow::registerMethods() {
     return JsonObject();
   });
   bridge_->on(L"desktopLyrics.song", [this](const JsonObject& params) {
-    const std::wstring title(params.GetNamedString(L"title"));
-    const std::wstring artist(params.GetNamedString(L"artist"));
-    hasSong_ = !title.empty();
-    tray_->setTip(!hasSong_ ? APP_NAME : artist.empty() ? title : title + L" - " + artist);
-    lyrics_->setSong(title, artist, lyricLinesOf(params.GetNamedArray(L"lines")));
+    lyrics_->setSong(std::wstring(params.GetNamedString(L"title")), std::wstring(params.GetNamedString(L"artist")),
+                     lyricLinesOf(params.GetNamedArray(L"lines")));
     return JsonObject();
   });
   bridge_->on(L"desktopLyrics.clock", [this](const JsonObject& params) {
-    playing_ = params.GetNamedBoolean(L"playing");
-    lyrics_->setClock(params.GetNamedNumber(L"ms"), playing_);
+    lyrics_->setClock(params.GetNamedNumber(L"ms"), params.GetNamedBoolean(L"playing"));
     return JsonObject();
   });
   bridge_->onAsync(L"desktopLyrics.font", [this](const JsonObject& params, Bridge::Respond respond, Bridge::Fail fail) {
@@ -390,17 +335,8 @@ void MainWindow::sendPendingLinks() {
 }
 
 void MainWindow::activate() {
-  if (!IsWindowVisible(hwnd_)) ShowWindow(hwnd_, SW_SHOW);
   if (IsIconic(hwnd_)) ShowWindow(hwnd_, SW_RESTORE);
   SetForegroundWindow(hwnd_);
-}
-
-void MainWindow::hideToTray() {
-  ShowWindow(hwnd_, SW_HIDE);
-  if (trayHinted_) return;
-  trayHinted_ = true;
-  saveSettings();
-  tray_->notify(tr(Text::TrayHintTitle, {APP_NAME}), tr(Text::TrayHintBody));
 }
 
 HRESULT MainWindow::fatal(Text step, HRESULT hr) {
@@ -521,12 +457,6 @@ LRESULT MainWindow::handle(UINT message, WPARAM wparam, LPARAM lparam) {
       return 0;
     case WM_WINDOWPOSCHANGED:
       syncShown();
-      break;
-    case WM_SYSCOMMAND:
-      if ((wparam & 0xFFF0) == SC_CLOSE && closeToTray_ && tray_->shown()) {
-        hideToTray();
-        return 0;
-      }
       break;
     case WM_DPICHANGED: {
       auto* rect = reinterpret_cast<RECT*>(lparam);

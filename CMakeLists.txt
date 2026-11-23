@@ -49,7 +49,6 @@ add_executable(${APP_ID} WIN32
   src/install.cpp
   src/updater.cpp
   src/text.cpp
-  src/tray.cpp
   src/vox.rc
 )
 

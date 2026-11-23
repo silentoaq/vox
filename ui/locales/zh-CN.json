@@ -102,6 +102,8 @@
   "error.playback": "暂时无法播放，请稍后再试",
 
   "karaoke.skipWait": "不等了，直接播放原唱",
+  "karaoke.warning": "性能较差的电脑开启伴唱会卡顿，不建议开启。",
+  "karaoke.turnOn": "开启伴唱",
   "karaoke.phase.installing": "下载工具",
   "karaoke.phase.preparing": "获取音频",
   "karaoke.phase.downloading": "下载音频 {percent}%",
@@ -201,9 +203,6 @@
 
   "settings.label": "账号与设置",
   "settings.language": "语言",
-  "settings.onClose": "关闭窗口时",
-  "settings.close.tray": "最小化到托盘继续播放",
-  "settings.close.quit": "退出 Vox",
   "language.system": "跟随系统",
   "account.title": "账号",
   "account.optional": "登录不是必需的，不登录也能点歌、唱歌。",

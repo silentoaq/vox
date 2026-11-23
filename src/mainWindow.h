@@ -16,7 +16,6 @@
 #include "link.h"
 #include "nowPlaying.h"
 #include "text.h"
-#include "tray.h"
 #include "updater.h"
 
 inline constexpr UINT WM_APP_RUN = WM_APP + 30;
@@ -37,11 +36,7 @@ private:
   void fitWebView();
   void syncShown();
   void activate();
-  void hideToTray();
-  void onTray(TrayCommand command);
   void control(const std::wstring& action);
-  void loadSettings();
-  void saveSettings();
   void sendPendingLinks();
   bool runOnUi(std::function<void()> task);
   Bridge::JsonObject desktopLyricsState() const;
@@ -57,14 +52,9 @@ private:
   std::unique_ptr<DesktopLyrics> lyrics_;
   std::unique_ptr<Karaoke> karaoke_;
   bool pageReady_ = false;
-  bool closeToTray_ = true;
   bool windowShown_ = true;
-  bool trayHinted_ = false;
-  bool hasSong_ = false;
-  bool playing_ = false;
   unsigned fontSerial_ = 0;
   std::vector<LinkRequest> pendingLinks_;
   std::unique_ptr<NowPlaying> nowPlaying_;
   std::unique_ptr<Updater> updater_;
-  std::unique_ptr<Tray> tray_;
 };
