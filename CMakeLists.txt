@@ -58,7 +58,7 @@ target_include_directories(${APP_ID} PRIVATE "${WEBVIEW2_DIR}/include" "${GENERA
 set_target_properties(${APP_ID} PROPERTIES OUTPUT_NAME "${APP_NAME}")
 target_link_libraries(${APP_ID} PRIVATE
   "${WEBVIEW2_DIR}/x64/WebView2LoaderStatic.lib"
-  winhttp windowsapp shell32 advapi32 version dwmapi d2d1 dwrite bcrypt crypt32
+  winhttp windowsapp shell32 shlwapi advapi32 version dwmapi d2d1 dwrite bcrypt crypt32
 )
 target_compile_definitions(${APP_ID} PRIVATE
   APP_NAME=L"${APP_NAME}"
@@ -72,6 +72,8 @@ target_compile_options(${APP_ID} PRIVATE /utf-8 /W4 /permissive- /EHsc)
 
 add_custom_command(TARGET ${APP_ID} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/ui" "$<TARGET_FILE_DIR:${APP_ID}>/ui"
+  COMMAND ${CMAKE_COMMAND} "-DROOT=${CMAKE_SOURCE_DIR}" "-DOUT=$<TARGET_FILE_DIR:${APP_ID}>/ui/vox-pitch-worklet.js"
+          -P "${CMAKE_SOURCE_DIR}/scripts/pitchWorklet.cmake"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MODEL_FILE}" "$<TARGET_FILE_DIR:${APP_ID}>/models/demucs-hdemucs_mmi-10s.onnx"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/LICENSE" "$<TARGET_FILE_DIR:${APP_ID}>/LICENSE.txt"
   COMMAND ${CMAKE_COMMAND} "-DROOT=${CMAKE_SOURCE_DIR}" "-DOUT=$<TARGET_FILE_DIR:${APP_ID}>/THIRD_PARTY_NOTICES.txt"

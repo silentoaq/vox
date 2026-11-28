@@ -1,6 +1,7 @@
 #include "mainWindow.h"
 
 #include <dwmapi.h>
+#include <shlwapi.h>
 
 #include <algorithm>
 #include <thread>
@@ -24,6 +25,9 @@ constexpr wchar_t kHostName[] = APP_ID L".localhost";
 constexpr wchar_t kStemsHostName[] = L"stems." APP_ID L".localhost";
 constexpr wchar_t kPageUrl[] = L"https://" APP_ID L".localhost/index.html";
 constexpr wchar_t kPageOrigin[] = L"https://" APP_ID L".localhost/";
+constexpr wchar_t kPitchWorkletPath[] = L"/" APP_ID L"-pitch-worklet.js";
+constexpr wchar_t kPitchWorkletFile[] = L"\\" APP_ID L"-pitch-worklet.js";
+constexpr const wchar_t* kPitchWorkletOrigins[] = {L"https://www.youtube.com", L"https://open.spotify.com"};
 constexpr COREWEBVIEW2_COLOR kBackground = {255, 0x0d, 0x0d, 0x10};
 constexpr int kMinWidth = 960;
 constexpr int kMinHeight = 620;
@@ -346,10 +350,10 @@ HRESULT MainWindow::fatal(Text step, HRESULT hr) {
 }
 
 void MainWindow::createWebView() {
-  auto soundTouch = readUtf8File(exeDir() + L"\\ui\\vendor\\soundtouch\\soundtouch.js");
+  auto pitchWorklet = readUtf8File(exeDir() + L"\\ui" + kPitchWorkletFile);
   auto effectsGraph = readUtf8File(exeDir() + L"\\ui\\js\\effectsGraph.js");
   auto frameBody = readUtf8File(exeDir() + L"\\ui\\inject\\embedFrame.js");
-  if (!soundTouch || !effectsGraph || !frameBody) {
+  if (!pitchWorklet || !effectsGraph || !frameBody) {
     fatal(Text::StepReadPlayerScript, HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
     return;
   }
@@ -360,7 +364,8 @@ void MainWindow::createWebView() {
     return;
   }
   for (size_t at; (at = graph.find(kExport)) != std::wstring::npos;) graph.replace(at, kExport.size(), L"\n");
-  const std::wstring frameScript = L"(() => {\n" + *soundTouch + L"\n" + graph + L"\n" + *frameBody + L"\n})();";
+  const std::string worklet = winrt::to_string(*pitchWorklet);
+  const std::wstring frameScript = L"(() => {\n" + graph + L"\n" + *frameBody + L"\n})();";
   clearDebugArguments();
   auto options = Make<CoreWebView2EnvironmentOptions>();
   options->put_AdditionalBrowserArguments(
@@ -368,12 +373,12 @@ void MainWindow::createWebView() {
   HRESULT hr = CreateCoreWebView2EnvironmentWithOptions(
     nullptr, (appDataDir() + L"\\WebView2").c_str(), options.Get(),
     Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-      [this, script = frameScript](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
+      [this, script = frameScript, worklet](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
         if (FAILED(result)) return fatal(Text::StepStartWebView, result);
         ComPtr<ICoreWebView2Environment> environment(env);
         return env->CreateCoreWebView2Controller(
           hwnd_, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-                   [this, script, environment](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
+                   [this, script, worklet, environment](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
                      if (FAILED(result)) return fatal(Text::StepCreateWebView, result);
                      controller_ = controller;
                      controller_->get_CoreWebView2(&webview_);
@@ -396,6 +401,33 @@ void MainWindow::createWebView() {
                                                                  COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_DENY);
                      webview3->SetVirtualHostNameToFolderMapping(kStemsHostName, Karaoke::stemsDir().c_str(),
                                                                  COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
+
+                     ComPtr<ICoreWebView2_22> webview22;
+                     webview_.As(&webview22);
+                     for (const wchar_t* origin : kPitchWorkletOrigins)
+                       webview22->AddWebResourceRequestedFilterWithRequestSourceKinds(
+                         (std::wstring(origin) + kPitchWorkletPath).c_str(), COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL,
+                         COREWEBVIEW2_WEB_RESOURCE_REQUEST_SOURCE_KINDS_ALL);
+                     webview_->add_WebResourceRequested(
+                       Callback<ICoreWebView2WebResourceRequestedEventHandler>(
+                         [environment, worklet](ICoreWebView2*, ICoreWebView2WebResourceRequestedEventArgs* args) -> HRESULT {
+                           ComPtr<ICoreWebView2WebResourceRequest> request;
+                           args->get_Request(&request);
+                           LPWSTR uri = nullptr;
+                           request->get_Uri(&uri);
+                           const bool ours = std::wstring_view(uri).ends_with(kPitchWorkletPath);
+                           CoTaskMemFree(uri);
+                           if (!ours) return S_OK;
+                           ComPtr<IStream> body;
+                           body.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(worklet.data()), UINT(worklet.size())));
+                           ComPtr<ICoreWebView2WebResourceResponse> response;
+                           HRESULT made = environment->CreateWebResourceResponse(
+                             body.Get(), 200, L"OK", L"Content-Type: text/javascript; charset=utf-8", &response);
+                           if (FAILED(made)) return made;
+                           return args->put_Response(response.Get());
+                         })
+                         .Get(),
+                       nullptr);
 
                      webview_->add_WebMessageReceived(
                        Callback<ICoreWebView2WebMessageReceivedEventHandler>(

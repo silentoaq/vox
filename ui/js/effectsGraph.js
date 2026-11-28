@@ -2,56 +2,56 @@ const BANDS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 const BAND_Q = 1.1;
 const RAMP_SECONDS = 0.04;
 const SWAP_MS = 60;
-const PITCH_FRAMES = 4096;
-export const PITCH_LATENCY_FRAMES = PITCH_FRAMES * 4.5;
+export const PITCH_LATENCY_FRAMES = 12288;
+const PITCH_WORKLET_PATH = '/vox-pitch-worklet.js';
+
+const pitchModules = new WeakMap();
+
+function loadPitchModule(ctx) {
+  if (!pitchModules.has(ctx)) pitchModules.set(ctx, ctx.audioWorklet.addModule(location.origin + PITCH_WORKLET_PATH));
+  return pitchModules.get(ctx);
+}
 
 function createPitchStage(ctx, destination) {
   const input = ctx.createGain();
-  const processor = ctx.createScriptProcessor(PITCH_FRAMES, 2, 2);
-  const interleaved = new Float32Array(PITCH_FRAMES * 2);
-  const shiftedFrames = new Float32Array(PITCH_FRAMES * 2);
-  let shifter = null;
-  let primed = false;
+  let node = null;
   let semitones = 0;
-  processor.onaudioprocess = (e) => {
-    const left = e.inputBuffer.getChannelData(0);
-    const right = e.inputBuffer.getChannelData(1);
-    for (let i = 0; i < PITCH_FRAMES; i++) {
-      interleaved[2 * i] = left[i];
-      interleaved[2 * i + 1] = right[i];
-    }
-    shifter.inputBuffer.putSamples(interleaved, 0, PITCH_FRAMES);
-    shifter.process();
-    primed ||= shifter.outputBuffer.frameCount >= PITCH_FRAMES * 2;
-    const count = primed ? Math.min(shifter.outputBuffer.frameCount, PITCH_FRAMES) : 0;
-    shifter.outputBuffer.receiveSamples(shiftedFrames, count);
-    const outLeft = e.outputBuffer.getChannelData(0);
-    const outRight = e.outputBuffer.getChannelData(1);
-    for (let i = 0; i < PITCH_FRAMES; i++) {
-      outLeft[i] = i < count ? shiftedFrames[2 * i] : 0;
-      outRight[i] = i < count ? shiftedFrames[2 * i + 1] : 0;
-    }
-  };
+  let serial = 0;
   input.connect(destination);
+
+  async function engage() {
+    const mine = ++serial;
+    await loadPitchModule(ctx);
+    if (mine !== serial) return;
+    node = new AudioWorkletNode(ctx, 'vox-pitch', {
+      outputChannelCount: [2],
+      processorOptions: { semitones, latencyFrames: PITCH_LATENCY_FRAMES }
+    });
+    node.onprocessorerror = () => console.error('升降調處理器停止運作');
+    input.disconnect();
+    input.connect(node);
+    node.connect(destination);
+  }
+
+  function release() {
+    ++serial;
+    if (!node) return;
+    input.disconnect();
+    node.disconnect();
+    node.port.close();
+    node = null;
+    input.connect(destination);
+  }
+
   return {
     input,
     latency: () => (semitones ? PITCH_LATENCY_FRAMES / ctx.sampleRate : 0),
     set(value) {
       const engaged = semitones !== 0;
       semitones = value;
-      if (shifter) shifter.pitchSemitones = value;
-      if (engaged === (value !== 0)) return;
-      input.disconnect();
-      if (value === 0) {
-        processor.disconnect();
-        input.connect(destination);
-        return;
-      }
-      shifter = new SoundTouchJS.SoundTouch();
-      shifter.pitchSemitones = value;
-      primed = false;
-      input.connect(processor);
-      processor.connect(destination);
+      if (value === 0) release();
+      else if (node) node.port.postMessage(value);
+      else if (!engaged) engage().catch((e) => console.error('升降調載入失敗', e));
     }
   };
 }

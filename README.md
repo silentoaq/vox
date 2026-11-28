@@ -101,7 +101,7 @@ build\Release\Vox.exe
 
 - `src\`：視窗、WebView2、帳號、桌面歌詞、媒體控制、更新。
 - `separate\`：人聲分離，獨立的執行檔。
-- `ui\`：畫面，沒有建置步驟的 HTML、CSS、JavaScript。
+- `ui\`：畫面，沒有建置步驟的 HTML、CSS、JavaScript。升降調在瀏覽器的聲音執行緒上跑，建置時會把 SoundTouch 和 `ui\js\pitchWorklet.js` 合成 `vox-pitch-worklet.js`。
 - `scripts\installer.nsi`：NSIS 安裝程式，也負責解除安裝。
 
 ### 翻譯
