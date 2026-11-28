@@ -1,0 +1,55 @@
+name: mac
+on:
+  push:
+    branches: [main, mac]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to stamp into the build
+        required: false
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh scripts/deps.sh
+      - run: |
+          version="${{ github.event.inputs.version }}"
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release ${version:+"-DVOX_VERSION=$version"}
+          cmake --build build --parallel
+      - run: |
+          otool -L build/Vox.app/Contents/MacOS/vox-separate
+          otool -l build/Vox.app/Contents/MacOS/vox-separate | grep -A2 LC_RPATH
+          codesign --verify --deep --verbose=2 build/Vox.app
+      - name: separation smoke test
+        run: |
+          brew install ffmpeg >/dev/null
+          ffmpeg -loglevel error -f lavfi -i "sine=frequency=440:duration=25" -f lavfi -i "sine=frequency=660:duration=25" \
+            -filter_complex amerge=inputs=2 -c:a aac -b:a 128k -movflags +frag_keyframe+empty_moov+default_base_moof+global_sidx \
+            -frag_duration 5000000 test.m4a
+          mkdir -p stems
+          build/Vox.app/Contents/MacOS/vox-separate build/Vox.app/Contents/Resources/models/demucs-hdemucs_mmi-10s.onnx \
+            "$PWD/stems/source.m4a" "$PWD/stems" 2 0 4 < test.m4a
+          cat stems/segments.json
+          ls stems
+      - name: app smoke test
+        run: |
+          build/Vox.app/Contents/MacOS/Vox > app.log 2>&1 &
+          sleep 25
+          curl -sf -H "Host: localhost:47391" http://localhost:47391/index.html | head -5
+          screencapture -x app.png || true
+          kill %1 || true
+          cat app.log
+      - run: |
+          mkdir -p dist/dmg
+          ditto -c -k --keepParent build/Vox.app dist/Vox.zip
+          cp -R build/Vox.app dist/dmg/
+          ln -s /Applications dist/dmg/Applications
+          hdiutil create -volname Vox -srcfolder dist/dmg -ov -format UDZO dist/Vox.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vox-mac
+          path: |
+            dist/Vox.zip
+            dist/Vox.dmg
+            app.png

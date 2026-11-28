@@ -1,11 +1,7 @@
 #pragma once
-#include <windows.h>
-#include <mfidl.h>
-#include <mfreadwrite.h>
-#include <objidl.h>
-#include <wrl.h>
-
 #include <cstdint>
+#include <filesystem>
+#include <memory>
 #include <vector>
 
 struct Audio {
@@ -15,12 +11,9 @@ struct Audio {
 
 class AudioReader {
 public:
-  AudioReader(IStream* stream, int sampleRate);
-  ~AudioReader();
-  int64_t estimatedSamples() const { return estimated_; }
-  bool readMore(Audio& audio);
-
-private:
-  Microsoft::WRL::ComPtr<IMFSourceReader> reader_;
-  int64_t estimated_ = 0;
+  virtual ~AudioReader() = default;
+  virtual int64_t estimatedSamples() const = 0;
+  virtual bool readMore(Audio& audio) = 0;
 };
+
+std::unique_ptr<AudioReader> openInputAudio(const std::filesystem::path& savePath, int sampleRate);

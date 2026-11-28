@@ -1,14 +1,14 @@
-import { createEffectsGraph } from './effectsGraph.js';
+import { PITCH_WORKLET_PATH, createEffectsGraph } from './effectsGraph.js';
 
 const SAMPLE_RATE = 44100;
 const LOOKAHEAD_SEGMENTS = 2;
 const DRIFT_SECONDS = 0.05;
 const START_LEAD_SECONDS = 0.05;
-const STEMS = `https://stems.${location.hostname}`;
 
 const segmentName = (stem, index) => `${stem}_${String(index).padStart(4, '0')}.opus`;
 
 export function createKaraoke() {
+  let stems = null;
   let ctx = null;
   let master = null;
   let accompaniment = null;
@@ -29,7 +29,7 @@ export function createKaraoke() {
     master = ctx.createGain();
     accompaniment = ctx.createGain();
     vocals = ctx.createGain();
-    effects = createEffectsGraph(ctx, ctx.destination);
+    effects = createEffectsGraph(ctx, ctx.destination, location.origin + PITCH_WORKLET_PATH);
     accompaniment.connect(master);
     vocals.connect(master);
     master.connect(effects.input);
@@ -48,7 +48,7 @@ export function createKaraoke() {
     if (!song.ready.has(index) || song.buffers.has(index) || song.loading.has(index)) return;
     const current = song;
     current.loading.add(index);
-    const responses = await Promise.all(['acc', 'voc'].map((stem) => fetch(`${STEMS}/${current.id}/${segmentName(stem, index)}`)));
+    const responses = await Promise.all(['acc', 'voc'].map((stem) => fetch(`${stems}/${current.id}/${segmentName(stem, index)}`)));
     for (const res of responses) if (!res.ok) throw new Error(`伴唱第 ${index} 段讀不到：${res.status}`);
     const [acc, voc] = await Promise.all(responses.map(async (res) => ctx.decodeAudioData(await res.arrayBuffer())));
     current.loading.delete(index);
@@ -99,6 +99,9 @@ export function createKaraoke() {
   }
 
   return {
+    setStems(url) {
+      stems = url;
+    },
     setSong(id) {
       stop();
       const seen = known.get(id);
@@ -123,7 +126,7 @@ export function createKaraoke() {
         song.ready.add(status.segment);
       } else if (status.state === 'complete') {
         const current = song;
-        const meta = await (await fetch(`${STEMS}/${current.id}/segments.json`)).json();
+        const meta = await (await fetch(`${stems}/${current.id}/segments.json`)).json();
         current.stride = meta.stride;
         current.total = meta.segments;
         for (let i = 0; i < meta.segments; i++) current.ready.add(i);

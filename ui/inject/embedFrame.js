@@ -26,7 +26,7 @@ let ownSource = false;
 
 function adopt(ctx, element, node) {
   const gain = ctx.createGain();
-  const chain = createEffectsGraph(ctx, gain);
+  const chain = createEffectsGraph(ctx, gain, pitchWorkletUrl);
   AudioNode.prototype.connect.call(node, chain.input);
   node.connect = (destination, ...rest) => {
     gain.connect(destination, ...rest);
@@ -47,7 +47,7 @@ function connect(element) {
     const ctx = new AudioContext({ latencyHint: 'playback' });
     const gain = ctx.createGain();
     gain.connect(ctx.destination);
-    const chain = createEffectsGraph(ctx, gain);
+    const chain = createEffectsGraph(ctx, gain, pitchWorkletUrl);
     ownSource = true;
     try {
       ctx.createMediaElementSource(element).connect(chain.input);

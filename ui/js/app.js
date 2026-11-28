@@ -1759,6 +1759,7 @@ function applyWindow(state) {
 on('window', applyWindow);
 
 const started = await call('ready');
+karaoke.setStems(started.stems);
 desktop = started.desktopLyrics;
 applyWindow(started.window);
 await loadLibrary();

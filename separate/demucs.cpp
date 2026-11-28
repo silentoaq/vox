@@ -11,7 +11,7 @@ struct Demucs::Runtime {
   Ort::Session session{nullptr};
 };
 
-Demucs::Demucs(const std::wstring& modelPath, int threads) : runtime_(std::make_unique<Runtime>()) {
+Demucs::Demucs(const std::filesystem::path& modelPath, int threads) : runtime_(std::make_unique<Runtime>()) {
   Ort::SessionOptions options;
   options.SetIntraOpNumThreads(threads);
   options.SetInterOpNumThreads(1);

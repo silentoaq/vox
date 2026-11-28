@@ -17,6 +17,7 @@
   X(LoginTitle, L"登入 {0}", L"登录 {0}", L"Sign in to {0}") \
   X(LoginWindowFailed, L"登入視窗開不起來（0x{0}）", L"登录窗口打不开（0x{0}）", L"The sign-in window couldn't open (0x{0})") \
   X(StartFailed, L"{0} 開不起來：{1}（0x{2}）", L"{0} 无法启动：{1}（0x{2}）", L"{0} couldn't start: {1} (0x{2})") \
+  X(StartFailedReason, L"{0} 開不起來：{1}", L"{0} 无法启动：{1}", L"{0} couldn't start: {1}") \
   X(StepReadPlayerScript, L"讀不到嵌入播放器的腳本", L"读不到嵌入播放器的脚本", L"the embedded player script is missing") \
   X(StepParseEffects, L"effectsGraph.js 格式不對", L"effectsGraph.js 格式不对", L"effectsGraph.js is malformed") \
   X(StepStartWebView, L"WebView2 啟動失敗", L"WebView2 启动失败", L"WebView2 failed to start") \

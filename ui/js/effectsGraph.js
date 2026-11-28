@@ -3,16 +3,16 @@ const BAND_Q = 1.1;
 const RAMP_SECONDS = 0.04;
 const SWAP_MS = 60;
 export const PITCH_LATENCY_FRAMES = 12288;
-const PITCH_WORKLET_PATH = '/vox-pitch-worklet.js';
+export const PITCH_WORKLET_PATH = '/vox-pitch-worklet.js';
 
 const pitchModules = new WeakMap();
 
-function loadPitchModule(ctx) {
-  if (!pitchModules.has(ctx)) pitchModules.set(ctx, ctx.audioWorklet.addModule(location.origin + PITCH_WORKLET_PATH));
+function loadPitchModule(ctx, url) {
+  if (!pitchModules.has(ctx)) pitchModules.set(ctx, ctx.audioWorklet.addModule(url));
   return pitchModules.get(ctx);
 }
 
-function createPitchStage(ctx, destination) {
+function createPitchStage(ctx, destination, workletUrl) {
   const input = ctx.createGain();
   let node = null;
   let semitones = 0;
@@ -21,7 +21,7 @@ function createPitchStage(ctx, destination) {
 
   async function engage() {
     const mine = ++serial;
-    await loadPitchModule(ctx);
+    await loadPitchModule(ctx, workletUrl);
     if (mine !== serial) return;
     node = new AudioWorkletNode(ctx, 'vox-pitch', {
       outputChannelCount: [2],
@@ -66,9 +66,9 @@ function impulse(ctx, seconds, decay) {
   return buffer;
 }
 
-export function createEffectsGraph(ctx, destination) {
+export function createEffectsGraph(ctx, destination, pitchWorkletUrl) {
   const preamp = ctx.createGain();
-  const pitch = createPitchStage(ctx, preamp);
+  const pitch = createPitchStage(ctx, preamp, pitchWorkletUrl);
   const bands = BANDS.map((frequency) => {
     const filter = ctx.createBiquadFilter();
     filter.type = 'peaking';

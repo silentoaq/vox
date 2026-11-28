@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -14,7 +15,7 @@ struct Stems {
 
 class Demucs {
 public:
-  Demucs(const std::wstring& modelPath, int threads);
+  Demucs(const std::filesystem::path& modelPath, int threads);
   ~Demucs();
   int segment() const { return segment_; }
   Stems separate(const float* left, const float* right);

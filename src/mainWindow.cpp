@@ -185,6 +185,7 @@ void MainWindow::registerMethods() {
     JsonObject result;
     result.SetNamedValue(L"desktopLyrics", desktopLyricsState());
     result.SetNamedValue(L"window", windowState());
+    result.SetNamedValue(L"stems", JsonValue::CreateStringValue(std::wstring(L"https://") + kStemsHostName));
     return result;
   });
   bridge_->on(L"language.get", [this](const JsonObject&) { return languageState(); });
@@ -365,7 +366,8 @@ void MainWindow::createWebView() {
   }
   for (size_t at; (at = graph.find(kExport)) != std::wstring::npos;) graph.replace(at, kExport.size(), L"\n");
   const std::string worklet = winrt::to_string(*pitchWorklet);
-  const std::wstring frameScript = L"(() => {\n" + graph + L"\n" + *frameBody + L"\n})();";
+  const std::wstring frameScript = L"(() => {\nconst pitchWorkletUrl = location.origin + '" + std::wstring(kPitchWorkletPath) +
+                                   L"';\n" + graph + L"\n" + *frameBody + L"\n})();";
   clearDebugArguments();
   auto options = Make<CoreWebView2EnvironmentOptions>();
   options->put_AdditionalBrowserArguments(

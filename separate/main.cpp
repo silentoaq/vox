@@ -1,9 +1,8 @@
-#include <windows.h>
-
 #include <algorithm>
 #include <climits>
 #include <cmath>
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -12,15 +11,16 @@
 
 #include "audioReader.h"
 #include "demucs.h"
-#include "incoming.h"
 
 namespace {
+
+using Path = std::filesystem::path;
 
 constexpr int kMargin = kSampleRate / 2;
 constexpr opus_int32 kAccompanimentBitrate = 128000;
 constexpr opus_int32 kVocalsBitrate = 96000;
 
-std::vector<float> readFloats(const std::wstring& path) {
+std::vector<float> readFloats(const Path& path) {
   std::ifstream file(path, std::ios::binary | std::ios::ate);
   std::vector<float> values(size_t(file.tellg()) / sizeof(float));
   file.seekg(0);
@@ -28,24 +28,26 @@ std::vector<float> readFloats(const std::wstring& path) {
   return values;
 }
 
-void writeAtomically(const std::wstring& path, const void* data, size_t bytes) {
-  const std::wstring temp = path + L".tmp";
+void writeAtomically(const Path& path, const void* data, size_t bytes) {
+  Path temp = path;
+  temp += ".tmp";
   {
     std::ofstream file(temp, std::ios::binary | std::ios::trunc);
     file.write(static_cast<const char*>(data), std::streamsize(bytes));
   }
-  MoveFileExW(temp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING);
+  std::filesystem::rename(temp, path);
 }
 
 void check(int result, const char* step) {
   if (result != OPE_OK) throw std::runtime_error(std::string(step) + ": " + ope_strerror(result));
 }
 
-void writeStem(const std::wstring& path, const std::vector<float>* channels, int from, int count, opus_int32 bitrate) {
+void writeStem(const Path& path, const std::vector<float>* channels, int from, int count, opus_int32 bitrate) {
   std::vector<float> interleaved(size_t(count) * 2);
   for (int i = 0; i < count; ++i)
     for (int ch = 0; ch < 2; ++ch) interleaved[size_t(i) * 2 + ch] = std::clamp(channels[ch][from + i], -1.0f, 1.0f);
-  const std::wstring temp = path + L".tmp";
+  Path temp = path;
+  temp += ".tmp";
   std::ofstream file(temp, std::ios::binary | std::ios::trunc);
   OpusEncCallbacks callbacks{
     [](void* user, const unsigned char* data, opus_int32 length) {
@@ -64,16 +66,16 @@ void writeStem(const std::wstring& path, const std::vector<float>* channels, int
   ope_encoder_destroy(encoder);
   ope_comments_destroy(comments);
   file.close();
-  MoveFileExW(temp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING);
+  std::filesystem::rename(temp, path);
 }
 
-std::wstring segmentName(const wchar_t* stem, int index) {
-  wchar_t name[32];
-  swprintf_s(name, L"%s_%04d.opus", stem, index);
+std::string segmentName(const char* stem, int index) {
+  char name[32];
+  std::snprintf(name, sizeof name, "%s_%04d.opus", stem, index);
   return name;
 }
 
-int parity(const std::wstring& model, const std::wstring& mixPath, const std::wstring& referencePath) {
+int parity(const Path& model, const Path& mixPath, const Path& referencePath) {
   auto mix = readFloats(mixPath);
   auto reference = readFloats(referencePath);
   Demucs demucs(model, 2);
@@ -92,14 +94,12 @@ int parity(const std::wstring& model, const std::wstring& mixPath, const std::ws
   return 0;
 }
 
-int separateSong(const std::wstring& model, const std::wstring& savePath, const std::wstring& outDir, int threads, double fromSeconds,
-                 int firstThreads) {
-  auto incoming = Microsoft::WRL::Make<Incoming>(GetStdHandle(STD_INPUT_HANDLE), savePath == L"-" ? std::wstring() : savePath);
+int separateSong(const Path& model, const Path& savePath, const Path& outDir, int threads, double fromSeconds, int firstThreads) {
+  auto reader = openInputAudio(savePath == "-" ? Path() : savePath, kSampleRate);
   auto demucs = std::make_unique<Demucs>(model, firstThreads);
-  AudioReader reader(incoming.Get(), kSampleRate);
   const int segment = demucs->segment();
   const int stride = segment - 2 * kMargin;
-  int samples = int(reader.estimatedSamples());
+  int samples = int(reader->estimatedSamples());
   const int estimatedSegments = (samples + stride - 1) / stride;
   printf("total %d %d %d\n", estimatedSegments, stride, samples);
   fflush(stdout);
@@ -107,7 +107,7 @@ int separateSong(const std::wstring& model, const std::wstring& savePath, const 
   Audio audio;
   bool ended = false;
   const auto decodeUntil = [&](int needed) {
-    while (!ended && int(audio.left.size()) < needed) ended = !reader.readMore(audio);
+    while (!ended && int(audio.left.size()) < needed) ended = !reader->readMore(audio);
     if (ended) samples = int(audio.left.size());
   };
   const int first = std::clamp(int(fromSeconds * kSampleRate) / stride, 0, std::max(estimatedSegments - 1, 0));
@@ -130,8 +130,8 @@ int separateSong(const std::wstring& model, const std::wstring& savePath, const 
     }
     Stems stems = demucs->separate(left.data(), right.data());
     const int count = std::min(stride, samples - index * stride);
-    writeStem(outDir + L"\\" + segmentName(L"acc", index), stems.accompaniment, kMargin, count, kAccompanimentBitrate);
-    writeStem(outDir + L"\\" + segmentName(L"voc", index), stems.vocals, kMargin, count, kVocalsBitrate);
+    writeStem(outDir / segmentName("acc", index), stems.accompaniment, kMargin, count, kAccompanimentBitrate);
+    writeStem(outDir / segmentName("voc", index), stems.vocals, kMargin, count, kVocalsBitrate);
     if (int(written.size()) <= index) written.resize(index + 1);
     written[index] = true;
     printf("ready %d\n", index);
@@ -148,7 +148,7 @@ int separateSong(const std::wstring& model, const std::wstring& savePath, const 
     if (index >= int(written.size()) || !written[index]) separateAt(index);
   const std::string meta = "{\"segments\":" + std::to_string(segments) + ",\"stride\":" + std::to_string(stride) +
                            ",\"samples\":" + std::to_string(samples) + ",\"sampleRate\":" + std::to_string(kSampleRate) + "}";
-  writeAtomically(outDir + L"\\segments.json", meta.data(), meta.size());
+  writeAtomically(outDir / "segments.json", meta.data(), meta.size());
   printf("done\n");
   fflush(stdout);
   return 0;
@@ -156,10 +156,12 @@ int separateSong(const std::wstring& model, const std::wstring& savePath, const 
 
 }
 
-int wmain(int argc, wchar_t** argv) {
+template <typename Char>
+int run(int argc, Char** argv) {
   try {
-    if (argc == 5 && std::wstring(argv[1]) == L"parity") return parity(argv[2], argv[3], argv[4]);
-    if (argc == 7) return separateSong(argv[1], argv[2], argv[3], _wtoi(argv[4]), _wtof(argv[5]), _wtoi(argv[6]));
+    const auto number = [](const Char* arg) { return std::stod(Path(arg).string()); };
+    if (argc == 5 && Path(argv[1]) == "parity") return parity(argv[2], argv[3], argv[4]);
+    if (argc == 7) return separateSong(argv[1], argv[2], argv[3], int(number(argv[4])), number(argv[5]), int(number(argv[6])));
     fprintf(stderr, "usage: vox-separate <model> <save-path|-> <out-dir> <threads> <from-seconds> <first-threads> < audio\n");
     return 2;
   } catch (const std::exception& e) {
@@ -168,3 +170,9 @@ int wmain(int argc, wchar_t** argv) {
     return 1;
   }
 }
+
+#ifdef _WIN32
+int wmain(int argc, wchar_t** argv) { return run(argc, argv); }
+#else
+int main(int argc, char** argv) { return run(argc, argv); }
+#endif

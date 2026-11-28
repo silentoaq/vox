@@ -8,10 +8,12 @@ function(component name url)
   endforeach()
 endfunction()
 
-component("WebView2 SDK" "https://www.nuget.org/packages/Microsoft.Web.WebView2"
-  deps/webview2/LICENSE.txt deps/webview2/NOTICE.txt)
+if(WEBVIEW2)
+  component("WebView2 SDK" "https://www.nuget.org/packages/Microsoft.Web.WebView2"
+    deps/webview2/LICENSE.txt deps/webview2/NOTICE.txt)
+endif()
 component("ONNX Runtime" "https://github.com/microsoft/onnxruntime"
-  deps/onnxruntime/LICENSE deps/onnxruntime/ThirdPartyNotices.txt)
+  ${ORT}/LICENSE ${ORT}/ThirdPartyNotices.txt)
 component("Opus" "https://opus-codec.org"
   deps/opus/COPYING)
 component("libopusenc" "https://github.com/xiph/libopusenc"
