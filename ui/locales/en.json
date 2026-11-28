@@ -51,7 +51,7 @@
   "queue.autoplay": "Autoplay",
   "queue.autoplayHint": "Similar songs play after your queue ends",
   "queue.upNext": "Up next",
-  "queue.autoplayTitle": "Autoplay: similar songs",
+  "queue.autoplayTitle": "Autoplay",
   "queue.playingFrom": "Next from: {name}",
   "queue.empty1": "The queue is empty",
   "queue.empty2": "Search for a song, then press Add",

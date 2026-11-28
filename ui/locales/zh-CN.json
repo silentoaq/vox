@@ -51,7 +51,7 @@
   "queue.autoplay": "自动播放",
   "queue.autoplayHint": "点的歌唱完后，继续播放相似的歌",
   "queue.upNext": "接下来",
-  "queue.autoplayTitle": "自动播放：相似的歌",
+  "queue.autoplayTitle": "自动播放",
   "queue.playingFrom": "接着播：{name}",
   "queue.empty1": "还没有点歌",
   "queue.empty2": "到“点歌”搜索，点击“点歌”加入列表",
