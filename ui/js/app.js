@@ -44,6 +44,9 @@ const VOCAL_KEY = 'vocal';
 const SOURCE_KEY = 'searchSource';
 const QUEUE_KEY = 'queueOpen';
 const RECOMMEND_SEEDS = 5;
+const REPEAT_KEY = 'repeat';
+const REPEAT_MODES = ['off', 'all', 'one'];
+const QUEUE_LABEL = { key: 'tab.queue' };
 const ASSUMED_DEVICE_RATE = 48000;
 const FRAME_PITCH_LATENCY_MS = (PITCH_LATENCY_FRAMES / ASSUMED_DEVICE_RATE) * 1000;
 const POPOVERS = ['fx', 'stylePanel', 'settings'];
@@ -95,6 +98,9 @@ let keyShift = 0;
 let karaokeTicker = 0;
 const karaokePhase = new Map();
 let autoplay = savedFlag(AUTOPLAY_KEY, true);
+let repeatMode = REPEAT_MODES.includes(savedText(REPEAT_KEY)) ? savedText(REPEAT_KEY) : 'off';
+let cycle = [];
+let cycleLabel = QUEUE_LABEL;
 const accountLists = new Map();
 const accountLoads = new Map();
 let karaokeOn = savedFlag(KARAOKE_KEY, false);
@@ -119,7 +125,7 @@ const playback = createPlayback($('player'), {
     updateKeys();
     frame();
   },
-  onEnded: () => playNext(),
+  onEnded: () => songEnded(),
   onError: (code) => {
     if (!current) return;
     playError = code === 100 ? 'error.removed' : code === 101 || code === 150 ? 'error.embedBlocked' : 'error.playback';
@@ -649,6 +655,8 @@ function updateKeys() {
   show('toggle', 'disabled', !current);
   show('restart', 'disabled', !current);
   show('skip', 'disabled', !current);
+  show('repeatToggle', 'textContent', t(`repeat.${repeatMode}`));
+  $('repeatToggle').classList.toggle('on', repeatMode !== 'off');
 }
 
 function linkedTrack(text) {
@@ -778,6 +786,7 @@ async function playSong(track, auto = false) {
   if (!current) view = 'stage';
   current = track;
   currentAuto = auto;
+  if (!auto && !cycle.some((item) => sameTrack(item, track))) cycle.push(track);
   playError = null;
   offsetMs = 0;
   played.add(trackKey(track));
@@ -832,6 +841,7 @@ function stopAll() {
   setEmbedMuted(false);
   holding = false;
   current = null;
+  cycle = [];
   applyKeyShift(0);
   sourceLines = [];
   lyricLines = [];
@@ -927,7 +937,7 @@ function renderDesktopKeys() {
   $('dlToggle').textContent = t(desktop.visible && desktop.locked ? 'key.unlockLyrics' : 'key.desktopLyrics');
 }
 
-const nextTrack = () => queue[0] ?? upNext?.tracks[0] ?? null;
+const nextTrack = () => queue[0] ?? upNext?.tracks[0] ?? (repeatMode === 'all' && current ? cycle[0] : null) ?? null;
 
 function prepareNextWhenClose(now, duration) {
   if (!karaokeOn || !current || !duration || duration - now > NEXT_LEAD_SECONDS) return;
@@ -940,11 +950,27 @@ function prepareNextWhenClose(now, duration) {
 function playNext() {
   if (queue.length) playSong(queue.shift());
   else if (upNext?.tracks.length) playSong(upNext.tracks.shift(), upNext.auto);
-  else stopAll();
+  else if (repeatMode === 'all' && cycle.length) {
+    const [first, ...rest] = cycle;
+    upNext = rest.length ? { label: cycleLabel, tracks: [...rest], auto: false } : null;
+    playSong(first);
+  } else stopAll();
+}
+
+function songEnded() {
+  if (repeatMode !== 'one' || !current) {
+    playNext();
+    return;
+  }
+  playback.seek(0);
+  playback.play();
+  frame();
 }
 
 function playFrom(track, label = null, rest = []) {
   upNext = rest.length ? { label, tracks: [...rest], auto: false } : null;
+  cycle = [track, ...rest];
+  cycleLabel = label ?? QUEUE_LABEL;
   playSong(track);
 }
 
@@ -955,7 +981,7 @@ function dropFromAutoplay(track) {
 }
 
 async function refreshAutoplay() {
-  if (!autoplay || !current || !autoplayOwnsNext()) return;
+  if (!autoplay || repeatMode === 'all' || !current || !autoplayOwnsNext()) return;
   if (currentAuto && upNext?.tracks.length) return;
   const seed = current;
   if (radioFor === trackKey(seed)) return;
@@ -969,7 +995,7 @@ async function refreshAutoplay() {
   } finally {
     if (radioFor === trackKey(seed)) radioFor = null;
   }
-  if (!autoplay || !sameTrack(current, seed) || !autoplayOwnsNext()) return;
+  if (!autoplay || repeatMode === 'all' || !sameTrack(current, seed) || !autoplayOwnsNext()) return;
   upNext = {
     label: null,
     tracks: found.filter((track) => !played.has(trackKey(track)) && !queue.some((item) => sameTrack(item, track))),
@@ -1572,6 +1598,14 @@ $('vol').addEventListener('input', () => applyVolume(Number($('vol').value)));
 $('vol').addEventListener('change', () => saveText(VOLUME_KEY, $('vol').value));
 $('vocal').addEventListener('input', () => applyVocal(Number($('vocal').value)));
 $('vocal').addEventListener('change', () => saveText(VOCAL_KEY, $('vocal').value));
+$('repeatToggle').addEventListener('click', () => {
+  repeatMode = REPEAT_MODES[(REPEAT_MODES.indexOf(repeatMode) + 1) % REPEAT_MODES.length];
+  saveText(REPEAT_KEY, repeatMode);
+  if (repeatMode === 'all' && upNext?.auto) upNext = null;
+  renderNowPlaying();
+  renderPanel();
+  refreshAutoplay();
+});
 $('autoplayToggle').addEventListener('click', () => {
   autoplay = !autoplay;
   saveFlag(AUTOPLAY_KEY, autoplay);

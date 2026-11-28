@@ -354,6 +354,8 @@ input.hue[type=range]::-webkit-slider-thumb { width: 8px; height: 20px; margin-t
   font-weight: 700; cursor: pointer; white-space: nowrap; }
 .text-key:hover:not(:disabled) { background: var(--hover); color: var(--text); }
 .text-key:disabled { opacity: .45; cursor: default; }
+.text-key.on { color: var(--accent); }
+#repeatToggle { min-width: 7em; }
 .play { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; color: #000; display: grid; place-items: center;
   cursor: pointer; }
 .play svg { width: 20px; height: 20px; fill: currentColor; }
