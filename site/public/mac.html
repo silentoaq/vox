@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>下載 Vox for Mac</title>
+<meta name="description" content="Vox 是桌面 KTV 播放器，歌來自 YouTube Music 和 Spotify，歌詞逐字跟著唱。">
+<link rel="icon" href="/assets/vox.webp">
+<style>
+:root {
+  --bg: #0d0d10;
+  --field: #0a0a0d;
+  --line: #2b2b33;
+  --ink: #f4f4f5;
+  --ink-2: #babac2;
+  --brand: #3ad38a;
+  --brand-ink: #04140c;
+  --font: -apple-system, "PingFang TC", "Microsoft JhengHei UI", "Noto Sans TC", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--font); }
+body { background: var(--bg); }
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+.wrap { max-width: 960px; margin: 0 auto; padding-inline: 24px; }
+.dl { padding-top: 56px; padding-bottom: 104px; }
+.dl__head { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.dl__icon { width: 72px; height: 72px; }
+.dl__title { flex: 1; min-width: 240px; }
+.h1 { font-size: clamp(32px, 4.6vw, 56px); font-weight: 900; line-height: 1.15; }
+.dl__sub { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 28px; color: var(--ink-2); }
+.textlink { color: var(--brand); font-weight: 700; text-decoration: none; }
+.textlink:hover { color: var(--ink); }
+.dl__why { margin-top: 28px; font-size: 18px; color: var(--ink-2); text-wrap: balance; }
+.dl__why b { color: var(--ink); }
+.path { list-style: none; margin-top: 40px; }
+.stop { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 24px; }
+.stop__rail { display: grid; grid-template-rows: 44px 1fr; justify-items: center; }
+.stop__n { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--brand); border-radius: 4px; background: var(--field); color: var(--brand); font-size: 20px; font-weight: 900; }
+.stop__rail::after { content: ""; width: 1px; background: linear-gradient(var(--brand), color-mix(in oklab, var(--brand) 20%, transparent)); }
+.stop:last-child .stop__rail::after { display: none; }
+.stop__body { padding-bottom: 48px; min-width: 0; }
+.stop__body h2 { font-size: 24px; font-weight: 900; line-height: 44px; }
+.steps { margin-top: 12px; padding-left: 1.4em; display: grid; gap: 6px; font-size: 17px; }
+.steps b { color: var(--brand); }
+.stop__note { margin-top: 12px; color: var(--ink-2); }
+.stop--done .stop__n { background: var(--brand); color: var(--brand-ink); }
+.stop--done .stop__body { display: grid; gap: 14px; justify-items: start; padding-bottom: 0; }
+.stop--done p { color: var(--ink-2); font-size: 18px; }
+.btn { display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 24px 0 28px; border-radius: 4px; background: var(--brand); color: var(--brand-ink); font-size: 17px; font-weight: 700; text-decoration: none; }
+.btn:hover { background: color-mix(in oklab, var(--brand) 82%, #fff); }
+.safe { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink-2); }
+@media (max-width: 560px) {
+  .wrap { padding-inline: 16px; }
+  .dl { padding-top: 32px; }
+  .stop { grid-template-columns: 36px minmax(0, 1fr); gap: 14px; }
+  .stop__rail { grid-template-rows: 36px 1fr; }
+  .stop__n { width: 36px; height: 36px; font-size: 17px; }
+  .stop__body h2 { font-size: 20px; line-height: 36px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap dl">
+  <header class="dl__head">
+    <img class="dl__icon" src="/assets/vox.webp" alt="" width="128" height="128">
+    <div class="dl__title">
+      <h1 class="h1">Vox 開始下載了</h1>
+      <p class="dl__sub">
+        <span>沒有開始？<a class="textlink" href="/latest/Vox.dmg">重新下載</a></span>
+        <span>macOS 13 以上，Apple 晶片（M1 以後）</span>
+        <a class="textlink" href="/">Windows 版</a>
+      </p>
+    </div>
+  </header>
+
+  <p class="dl__why">Vox 沒有經過 Apple 公證，第一次打開時 macOS 會擋下來。<b>照下面的順序做一次</b>，之後就能直接打開。</p>
+
+  <ol class="path">
+    <li class="stop">
+      <div class="stop__rail"><span class="stop__n">1</span></div>
+      <div class="stop__body">
+        <h2>把 Vox 拖進「應用程式」</h2>
+        <ol class="steps">
+          <li>打開剛下載的 <b>Vox.dmg</b></li>
+          <li>把 Vox 的圖示拖到旁邊的「應用程式」資料夾</li>
+        </ol>
+        <p class="stop__note">不放進「應用程式」也能用，但不會自動更新。</p>
+      </div>
+    </li>
+    <li class="stop">
+      <div class="stop__rail"><span class="stop__n">2</span></div>
+      <div class="stop__body">
+        <h2>第一次打開，macOS 說無法確認 Vox</h2>
+        <ol class="steps">
+          <li>在跳出的視窗按 <b>完成</b></li>
+          <li>打開 <b>系統設定</b>，按左邊的 <b>隱私權與安全性</b></li>
+          <li>往下捲到「安全性」，在說 Vox 被阻擋的那一行按 <b>仍要打開</b></li>
+          <li>輸入電腦的密碼，再按一次 <b>仍要打開</b></li>
+        </ol>
+      </div>
+    </li>
+    <li class="stop stop--done">
+      <div class="stop__rail"><span class="stop__n">3</span></div>
+      <div class="stop__body">
+        <h2>Vox 打開了</h2>
+        <p>登入 YouTube Music 或 Spotify 就能開始點歌。</p>
+        <a class="btn" href="https://github.com/silentoaq/vox#readme">看使用說明<svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M224.49 136.49l-72 72a12 12 0 0 1-17-17L187 140H40a12 12 0 0 1 0-24h147l-51.49-51.51a12 12 0 0 1 17-17l72 72a12 12 0 0 1-.02 17z"/></svg></a>
+      </div>
+    </li>
+  </ol>
+
+  <p class="safe">只從 vox.lichitdev.com 或 GitHub 的 silentoaq/vox 下載。從別處拿到的 Vox，不要略過這些提醒。</p>
+</main>
+<script>
+location.assign('/latest/Vox.dmg');
+</script>
+</body>
+</html>

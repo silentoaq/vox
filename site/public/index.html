@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>下載 Vox</title>
-<meta name="description" content="Vox 是 Windows 上的桌面 KTV 播放器，歌來自 YouTube Music 和 Spotify，歌詞逐字跟著唱。">
+<meta name="description" content="Vox 是桌面 KTV 播放器，歌來自 YouTube Music 和 Spotify，歌詞逐字跟著唱。">
 <link rel="icon" href="/assets/vox.webp">
 <style>
 :root {
@@ -87,6 +87,7 @@ img { display: block; max-width: 100%; }
       <p class="dl__sub">
         <span>沒有開始？<a class="textlink" href="/latest/VoxSetup.exe">重新下載</a></span>
         <span>Windows 10、11</span>
+        <a class="textlink" href="/mac">Mac 版</a>
       </p>
     </div>
   </header>
@@ -184,7 +185,8 @@ document.querySelectorAll('[data-browser]').forEach((button) => {
     document.querySelectorAll('[data-for]').forEach((stop) => { stop.hidden = stop.dataset.for !== button.dataset.browser; });
   });
 });
-location.assign('/latest/VoxSetup.exe');
+if (/Mac/.test(navigator.platform)) location.replace('/mac');
+else location.assign('/latest/VoxSetup.exe');
 </script>
 </body>
 </html>

@@ -65,13 +65,61 @@ $signer = New-Object Security.Cryptography.ECDsaCng([Security.Cryptography.CngKe
 $signer.HashAlgorithm = [Security.Cryptography.CngAlgorithm]::Sha256
 [IO.File]::WriteAllBytes((Join-Path $latest 'update.sig'), $signer.SignData($manifestBytes))
 
-"Vox $version：安裝檔 $([math]::Round($size / 1MB, 1)) MB"
+if ((git -C $root remote get-url origin) -notmatch 'github\.com[:/](.+?)(\.git)?$') { throw 'origin 不是 GitHub 的 repo' }
+$repo = $Matches[1]
+$ask = Join-Path $out 'credential.txt'
+[IO.File]::WriteAllText($ask, "protocol=https`nhost=github.com`n`n", $utf8)
+$token = (cmd /c "git credential fill < `"$ask`"" | Where-Object { $_ -like 'password=*' }) -replace '^password=', ''
+Remove-Item $ask
+if (-not $token) { throw '拿不到 GitHub 的登入憑證' }
+$headers = @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json' }
+$ProgressPreference = 'SilentlyContinue'
+
+$branch = (git -C $root rev-parse --abbrev-ref HEAD).Trim()
+$head = (git -C $root rev-parse HEAD).Trim()
+git -C $root fetch -q origin $branch
+if ($LASTEXITCODE -ne 0 -or (git -C $root rev-parse "origin/$branch").Trim() -ne $head) { throw "先把 $branch 推上 GitHub，Mac 版在 GitHub 上建置" }
+$dispatched = [DateTime]::UtcNow.AddSeconds(-5)
+Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/$repo/actions/workflows/mac.yml/dispatches" -Headers $headers `
+  -ContentType 'application/json' -Body (ConvertTo-Json @{ ref = $branch; inputs = @{ version = $version } }) | Out-Null
+"等 GitHub 建置 Mac 版"
+$run = $null
+while (-not $run -or $run.status -ne 'completed') {
+  Start-Sleep 20
+  $runs = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/actions/workflows/mac.yml/runs?event=workflow_dispatch&head_sha=$head" -Headers $headers
+  $run = $runs.workflow_runs | Where-Object { [DateTime]::Parse($_.created_at).ToUniversalTime() -ge $dispatched } | Select-Object -First 1
+}
+if ($run.conclusion -ne 'success') { throw "Mac 版建置失敗：$($run.html_url)" }
+$artifact = (Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/actions/runs/$($run.id)/artifacts" -Headers $headers).artifacts |
+  Where-Object { $_.name -eq 'vox-mac' }
+if (-not $artifact) { throw 'Mac 版建置結果裡沒有 vox-mac' }
+$macDir = Join-Path $out 'mac'
+$macArchive = Join-Path $out 'vox-mac.zip'
+Invoke-WebRequest -Uri $artifact.archive_download_url -Headers $headers -OutFile $macArchive
+Expand-Archive $macArchive -DestinationPath $macDir
+Remove-Item $macArchive
+$macZip = Join-Path $macDir 'dist\Vox.zip'
+$dmg = Join-Path $macDir 'dist\Vox.dmg'
+foreach ($file in @($macZip, $dmg)) { if (-not (Test-Path $file)) { throw "Mac 版建置結果裡少了 $file" } }
+Copy-Item $dmg (Join-Path $latest 'Vox.dmg')
+
+$macSha = (Get-FileHash -Algorithm SHA256 $macZip).Hash.ToLowerInvariant()
+$macSize = (Get-Item $macZip).Length
+Copy-Item $macZip (Join-Path $blobs $macSha)
+$macManifest = [ordered]@{ version = $version; archive = [ordered]@{ url = "$filesUrl/$macSha"; size = $macSize; sha256 = $macSha } } | ConvertTo-Json -Depth 4 -Compress
+$macManifestBytes = $utf8.GetBytes($macManifest)
+[IO.File]::WriteAllBytes((Join-Path $latest 'mac.json'), $macManifestBytes)
+[IO.File]::WriteAllBytes((Join-Path $latest 'mac.sig'), $signer.SignData($macManifestBytes))
+
+"Vox $version：Windows 安裝檔 $([math]::Round($size / 1MB, 1)) MB，Mac 版 $([math]::Round((Get-Item $dmg).Length / 1MB, 1)) MB"
 "上傳資料夾：$upload"
 
 if ($Bucket) {
-  npx --yes wrangler r2 object put "$Bucket/files/$sha" --file (Join-Path $blobs $sha) --cache-control 'public, max-age=31536000, immutable' --remote
-  if ($LASTEXITCODE -ne 0) { throw '上傳 files 失敗' }
-  foreach ($name in @('VoxSetup.exe', 'update.sig', 'update.json')) {
+  foreach ($blob in @($sha, $macSha)) {
+    npx --yes wrangler r2 object put "$Bucket/files/$blob" --file (Join-Path $blobs $blob) --cache-control 'public, max-age=31536000, immutable' --remote
+    if ($LASTEXITCODE -ne 0) { throw "上傳 files/$blob 失敗" }
+  }
+  foreach ($name in @('VoxSetup.exe', 'Vox.dmg', 'update.sig', 'update.json', 'mac.sig', 'mac.json')) {
     npx --yes wrangler r2 object put "$Bucket/latest/$name" --file (Join-Path $latest $name) --cache-control 'no-cache' --remote
     if ($LASTEXITCODE -ne 0) { throw "上傳 latest/$name 失敗" }
   }
@@ -80,18 +128,11 @@ if ($Bucket) {
   if ($LASTEXITCODE -ne 0) { throw "建立標籤 v$version 失敗" }
   git -C $root push origin "v$version"
   if ($LASTEXITCODE -ne 0) { throw "推送標籤 v$version 失敗" }
-  if ((git -C $root remote get-url origin) -notmatch 'github\.com[:/](.+?)(\.git)?$') { throw 'origin 不是 GitHub 的 repo' }
-  $repo = $Matches[1]
-  $ask = Join-Path $out 'credential.txt'
-  [IO.File]::WriteAllText($ask, "protocol=https`nhost=github.com`n`n", $utf8)
-  $token = (cmd /c "git credential fill < `"$ask`"" | Where-Object { $_ -like 'password=*' }) -replace '^password=', ''
-  Remove-Item $ask
-  if (-not $token) { throw '拿不到 GitHub 的登入憑證' }
-  $headers = @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json' }
   $release = Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/$repo/releases" -Headers $headers -ContentType 'application/json' `
     -Body (ConvertTo-Json @{ tag_name = "v$version"; name = "Vox $version"; generate_release_notes = $true })
-  $ProgressPreference = 'SilentlyContinue'
-  Invoke-RestMethod -Method Post -Uri "https://uploads.github.com/repos/$repo/releases/$($release.id)/assets?name=VoxSetup.exe" -Headers $headers `
-    -ContentType 'application/octet-stream' -InFile $setup | Out-Null
+  foreach ($asset in @($setup, $dmg)) {
+    Invoke-RestMethod -Method Post -Uri "https://uploads.github.com/repos/$repo/releases/$($release.id)/assets?name=$(Split-Path -Leaf $asset)" `
+      -Headers $headers -ContentType 'application/octet-stream' -InFile $asset | Out-Null
+  }
   "GitHub Release：$($release.html_url)"
 }

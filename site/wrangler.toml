@@ -5,6 +5,8 @@ routes = [
   { pattern = "vox.lichitdev.com/", zone_name = "lichitdev.com" },
   { pattern = "vox.lichitdev.com/assets/*", zone_name = "lichitdev.com" },
   { pattern = "vox.lichitdev.com/latest/VoxSetup.exe", zone_name = "lichitdev.com" },
+  { pattern = "vox.lichitdev.com/latest/Vox.dmg", zone_name = "lichitdev.com" },
+  { pattern = "vox.lichitdev.com/mac", zone_name = "lichitdev.com" },
 ]
 
 [assets]

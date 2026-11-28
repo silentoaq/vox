@@ -1,8 +1,8 @@
 # Vox
 
-Windows 上的桌面 KTV 播放器。歌來自 YouTube Music 和 Spotify，歌詞逐字跟著唱，還能去人聲、升降調。
+Windows 和 Mac 上的桌面 KTV 播放器。歌來自 YouTube Music 和 Spotify，歌詞逐字跟著唱，還能去人聲、升降調。
 
-Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所以安裝檔不用帶一整份瀏覽器。
+Vox 是用 C++ 寫的小程式，畫面交給系統內建的網頁元件，Windows 用 WebView2、Mac 用 WebKit，所以不用帶一整份瀏覽器。
 
 ## 功能
 
@@ -12,10 +12,12 @@ Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所�
 - **升降調與音效**：逐首記住調了幾個半音；內建等化器和殘響。
 - **桌面歌詞**：一條浮在所有視窗上面的歌詞，可以鎖定，滑鼠會穿過去。
 - **收藏、歌單、播放歷史**：存在這台電腦上；登入後也能用 YouTube、Spotify 帳號裡的歌單。
-- **給其他程式用**：`vox://` 連結可以叫它點歌、播放、暫停；正在播什麼會報給 Windows 的媒體控制，逐字歌詞存成檔案。
+- **給其他程式用**：`vox://` 連結可以叫它點歌、播放、暫停；正在播什麼會報給系統的媒體控制，逐字歌詞存成檔案。
 - **語言**：繁體中文、简体中文、English，預設跟著系統。歌詞的繁簡、歌名和歌單的顯示語言、預設字型也跟著換。
 
 ## 安裝
+
+### Windows
 
 下載 [VoxSetup.exe](https://vox.lichitdev.com/latest/VoxSetup.exe) 執行。
 
@@ -23,6 +25,15 @@ Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所�
 - 不需要系統管理員權限。預設裝在 `%LOCALAPPDATA%\Programs\Vox`，安裝時可以改位置。
 - 之後會自動更新：開 Vox 時在背景下載新版的安裝程式，下次開 Vox 會先裝好新版再打開。
 - 解除安裝在 Windows 的「應用程式」裡。最後會問要不要一併刪除收藏、歌單、播放紀錄和登入資料，選「否」就保留。
+
+### Mac
+
+下載 [Vox.dmg](https://vox.lichitdev.com/mac)，打開後把 Vox 拖進「應用程式」。
+
+- 需要 macOS 13 以上和 Apple 晶片（M1 以後）。Intel 的 Mac 不支援，因為伴唱用的 ONNX Runtime 只出 Apple 晶片的版本。
+- Vox 沒有經過 Apple 公證，第一次打開會被擋下：到「系統設定」的「隱私權與安全性」，在說 Vox 被阻擋的那一行按「仍要打開」。之後就能直接打開。
+- 放在「應用程式」裡才會自動更新：開 Vox 時在背景下載新版，下次開 Vox 會先換成新版再打開。
+- 解除安裝是把 Vox 從「應用程式」丟到垃圾桶；收藏、歌單這些資料在 `~/Library/Application Support/Vox`，要一併刪掉就刪這個資料夾。
 
 ## 登入是選用的
 
@@ -35,7 +46,7 @@ Vox 是用 C++ 寫的小程式，畫面交給 Windows 內建的 WebView2，所�
 
 ## 給其他程式用
 
-叫 Vox 做事用 `vox://` 連結；要知道正在播什麼，讀 Windows 的媒體控制和 Vox 存的歌詞檔。
+叫 Vox 做事用 `vox://` 連結；要知道正在播什麼，讀系統的媒體控制和 Vox 存的歌詞檔。
 
 ### 連結
 
@@ -56,7 +67,7 @@ vox://dequeue?source=ytm&id=QoXDQa9L12A
 
 中文可以直接寫，也可以做網址編碼。除了 `open`，Vox 沒開的話會在背景開起來，不會搶走目前視窗的焦點。連結照收到的順序一個一個做。做不到時 Vox 會跳提示，但要的狀態本來就是那樣的不跳，例如沒在播時暫停、要移除的歌已經不在清單裡。
 
-安裝時會在 `HKEY_CURRENT_USER\Software\Classes\vox` 登記，從 `HKEY_CLASSES_ROOT\vox\shell\open\command` 也讀得到。
+Windows 在安裝時會在 `HKEY_CURRENT_USER\Software\Classes\vox` 登記，從 `HKEY_CLASSES_ROOT\vox\shell\open\command` 也讀得到。Mac 在 Vox 放進「應用程式」後由系統自己登記，用 `open "vox://..."` 就能叫它。
 
 ### 正在播什麼
 
@@ -68,9 +79,11 @@ Vox 開著時會在 Windows 的媒體控制登記一個工作階段，`SourceApp
 
 鍵盤的媒體鍵和 Windows 的媒體控制面板也能播放、暫停、下一首。
 
+Mac 上會報給系統的「正在播放」，控制中心和鍵盤的媒體鍵都能播放、暫停、下一首。
+
 ### 歌詞檔
 
-正在播的歌的逐字歌詞存在 `%LOCALAPPDATA%\Vox\lyrics.json`，換歌、歌詞載好、在 Vox 裡調歌詞快慢時會整個重寫：
+正在播的歌的逐字歌詞存在 `lyrics.json`，Windows 在 `%LOCALAPPDATA%\Vox`，Mac 在 `~/Library/Application Support/Vox`，換歌、歌詞載好、在 Vox 裡調歌詞快慢時會整個重寫：
 
 ```json
 { "title": "晴天", "artist": "周杰倫", "source": "ytm", "id": "…", "state": "ready",
@@ -86,7 +99,7 @@ Vox 開著時會在 Windows 的媒體控制登記一個工作階段，`SourceApp
 
 ## 從原始碼建置
 
-需要 Visual Studio（含「使用 C++ 的桌面開發」）、CMake 3.25 以上。
+Windows 需要 Visual Studio（含「使用 C++ 的桌面開發」）、CMake 3.25 以上。
 
 ```
 powershell -ExecutionPolicy Bypass -File scripts\deps.ps1
@@ -97,9 +110,21 @@ build\Release\Vox.exe
 
 `scripts\deps.ps1` 會把 WebView2 SDK、ONNX Runtime、Opus、NSIS 等相依元件和伴唱模型下載到 `deps\`。開發時加 `-DVOX_DEVTOOLS=ON` 可以開 DevTools。
 
-程式分四塊：
+Mac 需要 Xcode 的命令列工具、CMake 3.25 以上：
 
-- `src\`：視窗、WebView2、帳號、桌面歌詞、媒體控制、更新。
+```
+sh scripts/deps.sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+open build/Vox.app
+```
+
+Mac 的畫面由 Vox 在本機 `localhost:47391` 開的伺服器提供，只接受本機連線。YouTube 的嵌入播放器會檢查來源網址，所以不能用自訂的網址開頭。
+
+程式分五塊：
+
+- `src\`：Windows 的視窗、WebView2、帳號、桌面歌詞、媒體控制、更新。
+- `mac\`：Mac 的同一套功能，用 AppKit 和 WebKit。
 - `separate\`：人聲分離，獨立的執行檔。
 - `ui\`：畫面，沒有建置步驟的 HTML、CSS、JavaScript。升降調在瀏覽器的聲音執行緒上跑，建置時會把 SoundTouch 和 `ui\js\pitchWorklet.js` 合成 `vox-pitch-worklet.js`。
 - `scripts\installer.nsi`：NSIS 安裝程式，也負責解除安裝。
@@ -134,13 +159,13 @@ python scripts\halfWeights.py core.onnx deps\models\demucs-hdemucs_mmi-10s.onnx
 powershell -File scripts\release.ps1 -Key <私鑰檔> -Bucket <R2 bucket>
 ```
 
-這會建置、用 NSIS 打包成 `VoxSetup.exe`、把安裝程式的雜湊寫進 `update.json` 並簽章，再用 `wrangler` 傳到 Cloudflare R2，最後打標籤、建 GitHub Release。不加 `-Bucket` 就只產生上傳資料夾，裡面的 `latest\` 和 `files\` 照原樣放到任何靜態主機都可以。
+這會建置、用 NSIS 打包成 `VoxSetup.exe`、把安裝程式的雜湊寫進 `update.json` 並簽章；Mac 版交給 GitHub Actions 建置，腳本等它建好、把 `Vox.zip` 的雜湊寫進 `mac.json` 並簽章，所以發版前要先把目前的分支推上 GitHub。接著用 `wrangler` 傳到 Cloudflare R2，最後打標籤、建 GitHub Release。不加 `-Bucket` 就只產生上傳資料夾，裡面的 `latest\` 和 `files\` 照原樣放到任何靜態主機都可以。
 
 版本號是發版當天的日期，像 `2026.11.16`，同一天再發一次就是 `2026.11.16.1`，腳本照 git 標籤自己算。更新網址改 `CMakeLists.txt` 的 `VOX_UPDATE_URL`。
 
 ### 下載頁
 
-`vox.lichitdev.com` 的首頁在 `site\`，是一支 Cloudflare Worker：首頁和圖是靜態檔案，`/latest/VoxSetup.exe` 從 R2 讀出來回傳，不讓 CDN 快取、下載的檔名固定。改完在 `site\` 跑：
+`vox.lichitdev.com` 的首頁在 `site\`，是一支 Cloudflare Worker：首頁和圖是靜態檔案，`/latest/VoxSetup.exe` 和 `/latest/Vox.dmg` 從 R2 讀出來回傳，不讓 CDN 快取、下載的檔名固定。改完在 `site\` 跑：
 
 ```
 npx wrangler deploy
@@ -148,17 +173,17 @@ npx wrangler deploy
 
 ## 資料放在哪裡
 
-| 內容 | 位置 |
-|---|---|
-| 收藏、歌單、播放紀錄、設定 | `%LOCALAPPDATA%\Vox` |
-| 登入資料 | `%LOCALAPPDATA%\Vox\WebView2` |
-| 分離好的伴奏 | `%LOCALAPPDATA%\Vox\stems` |
-| 下載好、還沒裝的新版 | `%LOCALAPPDATA%\Vox\update` |
+| 內容 | Windows | Mac |
+|---|---|---|
+| 收藏、歌單、播放紀錄、設定 | `%LOCALAPPDATA%\Vox` | `~/Library/Application Support/Vox` |
+| 登入資料 | `%LOCALAPPDATA%\Vox\WebView2` | `~/Library/WebKit/com.lichitdev.vox` |
+| 分離好的伴奏 | `%LOCALAPPDATA%\Vox\stems` | `~/Library/Application Support/Vox/stems` |
+| 下載好、還沒裝的新版 | `%LOCALAPPDATA%\Vox\update` | `~/Library/Application Support/Vox/update` |
 
 ## 授權
 
 Vox 以 [GPL-3.0](LICENSE) 釋出。
 
-用到的第三方元件有 WebView2、ONNX Runtime、Opus、libopusenc、PocketFFT、SoundTouch、opencc-js，各自的授權條款全文在安裝資料夾的 `THIRD_PARTY_NOTICES.txt`。人聲分離用的是 Meta Research 的 [Demucs](https://github.com/facebookresearch/demucs) 模型，伴唱的音訊由 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 下載。
+用到的第三方元件有 WebView2、ONNX Runtime、Opus、libopusenc、PocketFFT、SoundTouch、opencc-js，各自的授權條款全文在安裝資料夾的 `THIRD_PARTY_NOTICES.txt`，Mac 在 `Vox.app/Contents/Resources` 裡。人聲分離用的是 Meta Research 的 [Demucs](https://github.com/facebookresearch/demucs) 模型，伴唱的音訊由 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 下載。
 
 Vox 是獨立的專案，跟 YouTube、Google、Spotify 沒有關係。
