@@ -42,8 +42,7 @@ img { display: block; }
 
 .side { background: #121216; border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
 .brand { height: 64px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 20px; font-size: 20px; font-weight: 800; }
-.brand-mark { width: 28px; height: 28px; border-radius: 4px; background: var(--accent); color: var(--accent-ink); display: grid;
-  place-items: center; font-size: 17px; font-weight: 900; }
+.brand-mark { width: 32px; height: 32px; }
 .nav { flex: none; padding: 4px 12px; display: flex; flex-direction: column; gap: 2px; }
 .nav button { height: 42px; padding: 0 14px; border: 0; border-radius: 4px; background: none; color: var(--sub); font-size: 15px;
   font-weight: 700; text-align: left; cursor: pointer; }

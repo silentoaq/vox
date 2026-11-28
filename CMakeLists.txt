@@ -72,6 +72,7 @@ target_compile_options(${APP_ID} PRIVATE /utf-8 /W4 /permissive- /EHsc)
 
 add_custom_command(TARGET ${APP_ID} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/ui" "$<TARGET_FILE_DIR:${APP_ID}>/ui"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/res/vox.png" "$<TARGET_FILE_DIR:${APP_ID}>/ui/vox.png"
   COMMAND ${CMAKE_COMMAND} "-DROOT=${CMAKE_SOURCE_DIR}" "-DOUT=$<TARGET_FILE_DIR:${APP_ID}>/ui/vox-pitch-worklet.js"
           -P "${CMAKE_SOURCE_DIR}/scripts/pitchWorklet.cmake"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MODEL_FILE}" "$<TARGET_FILE_DIR:${APP_ID}>/models/demucs-hdemucs_mmi-10s.onnx"
