@@ -244,8 +244,6 @@ function scopeTabsHtml() {
 }
 
 function upNextHtml() {
-  const head = `<div class="list-head"><span>${t(autoplay ? 'queue.autoplayOn' : 'queue.autoplayOff')}</span>
-    <button class="btn${autoplay ? ' on' : ''}" data-act="autoplay">${t('queue.autoplay')}</button></div>`;
   const nowRow = current ? `<div class="section">${t('row.nowPlaying')}</div>${rowHtml(current, -1, 'now')}` : '';
   const queued = queue.length
     ? `<div class="section">${t('queue.upNext')}</div>${queue.map((track, i) => rowHtml(track, i, 'queue')).join('')}`
@@ -256,7 +254,7 @@ function upNextHtml() {
       )}</div>${upNext.tracks.map((track, i) => rowHtml(track, i, 'next')).join('')}`
     : '';
   const empty = nextTrack() ? '' : emptyHtml(t('queue.empty1'), t('queue.empty2'));
-  return head + nowRow + queued + following + empty;
+  return nowRow + queued + following + empty;
 }
 
 function renderPanel() {
@@ -554,6 +552,7 @@ function updateKeys() {
   show('toggle', 'disabled', !current);
   show('restart', 'disabled', !current);
   show('skip', 'disabled', !current);
+  $('autoplayToggle').classList.toggle('on', autoplay);
 }
 
 function linkedTrack(text) {
@@ -1101,14 +1100,6 @@ panel.addEventListener('click', (e) => {
       openAccount = null;
       renderPanel();
       break;
-    case 'autoplay':
-      autoplay = !autoplay;
-      saveFlag(AUTOPLAY_KEY, autoplay);
-      if (!autoplay && upNext?.auto) upNext = null;
-      renderNowPlaying();
-      renderPanel();
-      refreshAutoplay();
-      break;
     case 'newPlaylist':
       openPlaylist = library.createPlaylist().id;
       renderPanel();
@@ -1460,6 +1451,14 @@ $('vol').addEventListener('input', () => applyVolume(Number($('vol').value)));
 $('vol').addEventListener('change', () => saveText(VOLUME_KEY, $('vol').value));
 $('vocal').addEventListener('input', () => applyVocal(Number($('vocal').value)));
 $('vocal').addEventListener('change', () => saveText(VOCAL_KEY, $('vocal').value));
+$('autoplayToggle').addEventListener('click', () => {
+  autoplay = !autoplay;
+  saveFlag(AUTOPLAY_KEY, autoplay);
+  if (!autoplay && upNext?.auto) upNext = null;
+  renderNowPlaying();
+  renderPanel();
+  refreshAutoplay();
+});
 $('kToggle').addEventListener('click', () => {
   if (karaokeOn) setKaraoke(false);
   else ask(t('karaoke.warning'), t('karaoke.turnOn'), () => setKaraoke(true));

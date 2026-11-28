@@ -51,8 +51,6 @@
   "accountList.empty": "這個歌單沒有能播的歌",
 
   "queue.autoplay": "自動播放",
-  "queue.autoplayOn": "全部播完後接著播相似的歌",
-  "queue.autoplayOff": "全部播完就停",
   "queue.upNext": "接下來",
   "queue.autoplayTitle": "自動播放：相似的歌",
   "queue.playingFrom": "接著播：{name}",
