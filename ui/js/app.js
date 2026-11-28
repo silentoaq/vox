@@ -43,6 +43,7 @@ const VOLUME_KEY = 'volume';
 const VOCAL_KEY = 'vocal';
 const SOURCE_KEY = 'searchSource';
 const QUEUE_KEY = 'queueOpen';
+const RECOMMEND_SEEDS = 5;
 const ASSUMED_DEVICE_RATE = 48000;
 const FRAME_PITCH_LATENCY_MS = (PITCH_LATENCY_FRAMES / ASSUMED_DEVICE_RATE) * 1000;
 const POPOVERS = ['fx', 'stylePanel', 'settings'];
@@ -64,7 +65,7 @@ const trackKey = (track) => `${track.source}:${track.id}`;
 let searchSource = sourceOf(savedText(SOURCE_KEY) ?? 'ytm');
 let view = 'pick';
 let results = null;
-const discover = { charts: [], chart: null, state: 'loading', tracks: [], recs: [] };
+const discover = { charts: [], chart: null, state: 'loading', tracks: [], recs: [], recsFor: null };
 const played = new Set();
 let confirmAction = null;
 const queue = [];
@@ -224,18 +225,34 @@ async function loadCharts() {
   loadChart(discover.charts[0].id);
 }
 
-async function loadRecommended() {
-  if (!accounts.signedIn('ytm')) {
-    discover.recs = [];
-    renderPanel();
-    return;
+const recommendSeeds = () =>
+  accounts.signedIn('ytm') ? [] : library.history().filter((track) => track.source === 'ytm').slice(0, RECOMMEND_SEEDS);
+
+function interleave(lists) {
+  const mixed = [];
+  for (let i = 0; i < Math.max(0, ...lists.map((list) => list.length)); i++) {
+    for (const list of lists) if (i < list.length) mixed.push(list[i]);
   }
+  return mixed;
+}
+
+async function loadRecommended() {
+  const seeds = recommendSeeds();
+  const key = seeds.length ? seeds.map(trackKey).join('|') : `home:${accounts.signedIn('ytm')}`;
+  if (discover.recsFor === key) return;
+  discover.recsFor = key;
+  const ytm = sourceOf('ytm');
+  let found;
   try {
-    discover.recs = await sourceOf('ytm').recommended();
+    found = seeds.length ? interleave(await Promise.all(seeds.map((seed) => ytm.radio(seed)))) : await ytm.recommended();
   } catch (e) {
     console.error('推薦讀不到', e);
-    discover.recs = [];
+    found = [];
   }
+  if (discover.recsFor !== key) return;
+  const sung = new Set(library.history().map(trackKey));
+  const seen = new Set();
+  discover.recs = found.filter((track) => !sung.has(trackKey(track)) && !seen.has(trackKey(track)) && seen.add(trackKey(track)));
   renderPanel();
 }
 
@@ -349,6 +366,7 @@ function setView(next) {
   if (view === 'playlist' && next !== 'playlist') savePlaylistName();
   view = next;
   renderPanel();
+  if (view === 'pick') loadRecommended();
 }
 
 function historyHtml() {
@@ -581,6 +599,7 @@ function pickAll(tracks) {
   if (!current) playSong(first);
   else queue.push(first);
   queue.push(...rest);
+  tracks.forEach(dropFromAutoplay);
   renderNowPlaying();
   renderPanel();
   toast(t('toast.pickedAll', { n: tracks.length }));
@@ -929,7 +948,11 @@ function playFrom(track, label = null, rest = []) {
   playSong(track);
 }
 
-const autoplayOwnsNext = () => !queue.length && (!upNext || upNext.auto);
+const autoplayOwnsNext = () => !upNext || upNext.auto;
+
+function dropFromAutoplay(track) {
+  if (upNext?.auto) upNext.tracks = upNext.tracks.filter((item) => !sameTrack(item, track));
+}
 
 async function refreshAutoplay() {
   if (!autoplay || !current || !autoplayOwnsNext()) return;
@@ -947,7 +970,11 @@ async function refreshAutoplay() {
     if (radioFor === trackKey(seed)) radioFor = null;
   }
   if (!autoplay || !sameTrack(current, seed) || !autoplayOwnsNext()) return;
-  upNext = { label: null, tracks: found.filter((track) => !played.has(trackKey(track))), auto: true };
+  upNext = {
+    label: null,
+    tracks: found.filter((track) => !played.has(trackKey(track)) && !queue.some((item) => sameTrack(item, track))),
+    auto: true
+  };
   renderNowPlaying();
   renderPanel();
 }
@@ -959,6 +986,7 @@ function pick(track, notify = true) {
     return;
   }
   queue.push(track);
+  dropFromAutoplay(track);
   renderNowPlaying();
   renderPanel();
   if (notify) toast(t('toast.picked', { title: track.title, position: queue.length }));
@@ -970,6 +998,7 @@ function insert(track, notify = true) {
     return;
   }
   queue.unshift(track);
+  dropFromAutoplay(track);
   renderNowPlaying();
   renderPanel();
   if (notify) toast(t('toast.inserted', { title: track.title }));
@@ -1732,6 +1761,7 @@ accounts.onChange((sourceId) => {
 });
 accounts.start();
 loadCharts();
+loadRecommended();
 await playback.ready;
 playback.setVolume(Number($('vol').value));
 if (effects.eq !== NO_EFFECTS.eq || effects.reverb !== NO_EFFECTS.reverb) applyEffects();
