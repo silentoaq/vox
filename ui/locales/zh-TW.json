@@ -14,9 +14,10 @@
 
   "search.placeholder": "歌名/歌手",
   "search.submit": "搜尋",
-  "search.empty1": "輸入歌名或歌手，按 Enter 搜尋",
-  "search.empty2": "找到後按「點歌」排進已點",
-  "search.empty3": "打「歌名/歌手」可以指定歌手或上傳者",
+  "search.hint": "打「歌名/歌手」可以指定歌手或上傳者",
+  "discover.charts": "排行榜",
+  "discover.recommended": "為你推薦",
+  "discover.failed": "暫時拿不到排行榜，請稍後再試",
   "search.none": "找不到符合的歌，換個歌名或歌手，或打「歌名/歌手」試試",
   "search.searching": "搜尋中",
   "search.failed": "暫時無法搜尋，請稍後再試",

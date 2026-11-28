@@ -14,9 +14,10 @@
 
   "search.placeholder": "歌名/歌手",
   "search.submit": "搜索",
-  "search.empty1": "输入歌名或歌手，按 Enter 搜索",
-  "search.empty2": "找到后点击“点歌”，加入已点列表",
-  "search.empty3": "输入“歌名/歌手”可以指定歌手或上传者",
+  "search.hint": "输入“歌名/歌手”可以指定歌手或上传者",
+  "discover.charts": "排行榜",
+  "discover.recommended": "为你推荐",
+  "discover.failed": "暂时无法获取排行榜，请稍后再试",
   "search.none": "没有找到匹配的歌，换个歌名或歌手，或输入“歌名/歌手”试试",
   "search.searching": "搜索中",
   "search.failed": "暂时无法搜索，请稍后再试",

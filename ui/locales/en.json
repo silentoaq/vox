@@ -14,9 +14,10 @@
 
   "search.placeholder": "Song/Artist",
   "search.submit": "Search",
-  "search.empty1": "Type a song or artist and press Enter",
-  "search.empty2": "Then press Add to queue a song",
-  "search.empty3": "Type \"song/artist\" to pick the artist or uploader",
+  "search.hint": "Type \"song/artist\" to pick the artist or uploader",
+  "discover.charts": "Charts",
+  "discover.recommended": "Recommended for you",
+  "discover.failed": "Charts aren't available right now. Try again later.",
   "search.none": "No matches. Try another song or artist, or type \"song/artist\".",
   "search.searching": "Searching",
   "search.failed": "Can't search right now. Try again later.",

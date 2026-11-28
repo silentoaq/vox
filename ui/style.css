@@ -184,6 +184,9 @@ img { display: block; }
 .stage.mv .band { display: none; }
 .list { flex: 1; min-height: 0; overflow-y: auto; }
 .main .list { padding: 0 20px 20px; }
+.main .section { padding: 20px 12px 10px; color: var(--text); font-size: 16px; font-weight: 700; }
+.chart-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 10px; }
+.search-hint { margin-top: 10px; color: var(--dim); font-size: 13px; }
 .queue .list { padding: 0 8px 16px; }
 .section { padding: 14px 12px 6px; color: var(--sub); font-size: 13px; }
 .empty { padding: 48px 24px; color: var(--sub); text-align: center; line-height: 1.8; font-size: 15px; }

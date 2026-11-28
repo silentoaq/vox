@@ -16,6 +16,9 @@ const SEARCH_PARAMS = {
 const VIDEO_SEARCH_PARAMS = 'EgIQAQ%3D%3D';
 const RADIO_PREFIX = 'RDAMVM';
 const LIBRARY_PLAYLISTS = 'FEmusic_liked_playlists';
+const CHARTS = 'FEmusic_charts';
+const HOME = 'FEmusic_home';
+const PLAYLIST_BROWSE_PREFIX = 'VL';
 const SONG_VIDEO_TYPE = 'MUSIC_VIDEO_TYPE_ATV';
 const UPLOAD_VIDEO_TYPE = 'MUSIC_VIDEO_TYPE_UGC';
 const NOT_ORIGINAL = /伴奏|翻唱|instrumental|karaoke|\bcover\b/i;
@@ -195,6 +198,43 @@ async function playlistTracks(browseId) {
   }
 }
 
+async function charts() {
+  const res = await innertube('browse', { browseId: CHARTS }, WEB_CLIENT);
+  const lists = [];
+  for (const shelf of walk(res, 'musicCarouselShelfRenderer')) {
+    for (const item of shelf.contents ?? []) {
+      const card = item.musicTwoRowItemRenderer;
+      const browseId = card?.navigationEndpoint?.browseEndpoint?.browseId;
+      if (browseId?.startsWith(PLAYLIST_BROWSE_PREFIX)) lists.push({ id: browseId, name: runsText(card.title) });
+    }
+  }
+  return lists;
+}
+
+async function recommended() {
+  const res = await innertube('browse', { browseId: HOME }, WEB_CLIENT);
+  const tracks = [];
+  const seen = new Set();
+  for (const item of walk(res, 'musicResponsiveListItemRenderer')) {
+    const id = item.playlistItemData?.videoId;
+    const columns = item.flexColumns ?? [];
+    if (!id || columns.length < 2 || seen.has(id)) continue;
+    seen.add(id);
+    const parts = columnText(columns[1]).split(' • ');
+    tracks.push({
+      source: 'ytm',
+      kind: first(item.overlay ?? {}, 'musicVideoType') === SONG_VIDEO_TYPE ? 'song' : 'video',
+      id,
+      title: columnText(columns[0]),
+      artist: parts[0] ?? '',
+      album: parts.length > 2 ? parts[1] : '',
+      duration: 0,
+      thumb: first(item.thumbnail ?? {}, 'thumbnails')?.at(-1)?.url ?? ''
+    });
+  }
+  return tracks;
+}
+
 async function timedLines(song) {
   const next = await innertube('next', { videoId: song.id }, TIMED_CLIENT);
   let browseId = null;
@@ -296,6 +336,8 @@ export const youtubeMusic = {
   radio,
   playlists,
   playlistTracks,
+  charts,
+  recommended,
   timedLines,
   whoAmI,
   accountChanged() {},

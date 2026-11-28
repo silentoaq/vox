@@ -64,6 +64,7 @@ const trackKey = (track) => `${track.source}:${track.id}`;
 let searchSource = sourceOf(savedText(SOURCE_KEY) ?? 'ytm');
 let view = 'pick';
 let results = null;
+const discover = { charts: [], chart: null, state: 'loading', tracks: [], recs: [] };
 const played = new Set();
 let confirmAction = null;
 const queue = [];
@@ -169,8 +170,73 @@ function rowHtml(track, i, kind) {
   return `<div class="row${isNow && kind !== 'queue' && kind !== 'next' ? ' now' : ''}" data-kind="${kind}" data-i="${i}">
     ${coverHtml(track.thumb)}
     <div class="text"><div class="title"><span class="name">${escapeHtml(track.title)}</span>${mark}</div>
-      <div class="meta">${badge ? `<span class="badge">${badge}</span>` : ''}<span class="artist">${escapeHtml(track.artist)}</span><span class="time">${clockText(track.duration)}</span></div></div>
+      <div class="meta">${badge ? `<span class="badge">${badge}</span>` : ''}<span class="artist">${escapeHtml(track.artist)}</span>${track.duration ? `<span class="time">${clockText(track.duration)}</span>` : ''}</div></div>
     <div class="acts">${acts}</div></div>`;
+}
+
+function discoverHtml() {
+  const recs = discover.recs.length
+    ? `<div class="section">${t('discover.recommended')}</div>${discover.recs.map((track, i) => rowHtml(track, i, 'rec')).join('')}`
+    : '';
+  const tabs = discover.charts
+    .map((chart) => `<button class="seg${chart.id === discover.chart ? ' on' : ''}" data-act="chart" data-id="${chart.id}">${escapeHtml(chart.name)}</button>`)
+    .join('');
+  const body =
+    discover.state === 'loading'
+      ? emptyHtml(t('common.loading'))
+      : discover.state === 'error'
+        ? emptyHtml(t('discover.failed'))
+        : discover.tracks.map((track, i) => rowHtml(track, i, 'chart')).join('');
+  return `${recs}<div class="section">${t('discover.charts')}</div><div class="chart-tabs">${tabs}</div>${body}`;
+}
+
+async function loadChart(id) {
+  discover.chart = id;
+  discover.state = 'loading';
+  renderPanel();
+  try {
+    const tracks = await sourceOf('ytm').playlistTracks(id);
+    if (discover.chart !== id) return;
+    discover.tracks = tracks;
+    discover.state = 'ready';
+  } catch (e) {
+    console.error('排行榜讀不到', id, e);
+    if (discover.chart !== id) return;
+    discover.state = 'error';
+  }
+  renderPanel();
+}
+
+async function loadCharts() {
+  try {
+    discover.charts = await sourceOf('ytm').charts();
+  } catch (e) {
+    console.error('排行榜清單讀不到', e);
+    discover.state = 'error';
+    renderPanel();
+    return;
+  }
+  if (!discover.charts.length) {
+    discover.state = 'error';
+    renderPanel();
+    return;
+  }
+  loadChart(discover.charts[0].id);
+}
+
+async function loadRecommended() {
+  if (!accounts.signedIn('ytm')) {
+    discover.recs = [];
+    renderPanel();
+    return;
+  }
+  try {
+    discover.recs = await sourceOf('ytm').recommended();
+  } catch (e) {
+    console.error('推薦讀不到', e);
+    discover.recs = [];
+  }
+  renderPanel();
 }
 
 const pageHeadHtml = (title, sub, acts = '') =>
@@ -262,7 +328,7 @@ function renderPanel() {
   if (view === 'playlist') $('plist').innerHTML = playlistHtml();
   if (view === 'history') $('hist').innerHTML = historyHtml();
 
-  if (!results) $('results').innerHTML = emptyHtml(t('search.empty1'), t('search.empty2'), t('search.empty3'));
+  if (!results) $('results').innerHTML = discoverHtml();
   else if (!results.length) $('results').innerHTML = emptyHtml(t('search.none'));
   else $('results').innerHTML = results.map((track, i) => rowHtml(track, i, 'pick')).join('');
 
@@ -988,6 +1054,10 @@ function trackOfRow(row) {
       return openAccount.tracks[i];
     case 'hist':
       return library.history()[i];
+    case 'chart':
+      return discover.tracks[i];
+    case 'rec':
+      return discover.recs[i];
     default:
       throw new Error(`不認得的清單：${row.dataset.kind}`);
   }
@@ -1061,6 +1131,12 @@ function playRow(row) {
       const tracks = library.history();
       return playFrom(tracks[i], { key: 'tab.history' }, tracks.slice(i + 1));
     }
+    case 'chart': {
+      const name = discover.charts.find((chart) => chart.id === discover.chart)?.name ?? '';
+      return playFrom(discover.tracks[i], { text: name }, discover.tracks.slice(i + 1));
+    }
+    case 'rec':
+      return playFrom(discover.recs[i], { key: 'discover.recommended' }, discover.recs.slice(i + 1));
     case 'queue':
       return playSong(queue.splice(i, 1)[0]);
     case 'next':
@@ -1130,6 +1206,9 @@ function onListAct(e) {
       });
       break;
     }
+    case 'chart':
+      if (target.dataset.id !== discover.chart) loadChart(target.dataset.id);
+      break;
     case 'clearHistory':
       ask(t('confirm.clearHistory', { n: library.history().length }), t('common.clear'), () => {
         library.clearHistory();
@@ -1649,8 +1728,10 @@ accounts.onChange((sourceId) => {
   renderNowPlaying();
   renderKeyShift();
   loadAccountLists(sourceOf(sourceId));
+  if (sourceId === 'ytm') loadRecommended();
 });
 accounts.start();
+loadCharts();
 await playback.ready;
 playback.setVolume(Number($('vol').value));
 if (effects.eq !== NO_EFFECTS.eq || effects.reverb !== NO_EFFECTS.reverb) applyEffects();
