@@ -17,6 +17,8 @@ const VIDEO_SEARCH_PARAMS = 'EgIQAQ%3D%3D';
 const RADIO_PREFIX = 'RDAMVM';
 const LIBRARY_PLAYLISTS = 'FEmusic_liked_playlists';
 const SONG_VIDEO_TYPE = 'MUSIC_VIDEO_TYPE_ATV';
+const UPLOAD_VIDEO_TYPE = 'MUSIC_VIDEO_TYPE_UGC';
+const NOT_ORIGINAL = /伴奏|翻唱|instrumental|karaoke|\bcover\b/i;
 const LYRICS_PAGE = 'MUSIC_PAGE_TYPE_TRACK_LYRICS';
 const ALBUM_PAGE = 'MUSIC_PAGE_TYPE_ALBUM';
 const PLAYING = 1;
@@ -136,7 +138,9 @@ async function radio({ id }) {
   return (first(res, 'playlistPanelRenderer')?.contents ?? [])
     .map((item) => item.playlistPanelVideoRenderer ?? item.playlistPanelVideoWrapperRenderer?.primaryRenderer?.playlistPanelVideoRenderer)
     .filter((panel) => panel?.videoId && panel.videoId !== id)
-    .map(panelTrack);
+    .filter((panel) => first(panel.navigationEndpoint ?? {}, 'musicVideoType') !== UPLOAD_VIDEO_TYPE)
+    .map(panelTrack)
+    .filter((track) => !NOT_ORIGINAL.test(track.title));
 }
 
 const continued = (token) => innertube('browse', { continuation: token }, WEB_CLIENT);

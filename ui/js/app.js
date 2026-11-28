@@ -87,6 +87,7 @@ let renameTimer = 0;
 let openAccount = null;
 let languageOpen = false;
 let upNext = null;
+let currentAuto = false;
 let radioFor = null;
 let preparedNext = null;
 let keyShift = 0;
@@ -679,8 +680,9 @@ function sendClock(ms, playing) {
   call('desktopLyrics.clock', { ms, playing });
 }
 
-async function playSong(track) {
+async function playSong(track, auto = false) {
   current = track;
+  currentAuto = auto;
   playError = null;
   offsetMs = 0;
   played.add(trackKey(track));
@@ -842,7 +844,7 @@ function prepareNextWhenClose(now, duration) {
 
 function playNext() {
   if (queue.length) playSong(queue.shift());
-  else if (upNext?.tracks.length) playSong(upNext.tracks.shift());
+  else if (upNext?.tracks.length) playSong(upNext.tracks.shift(), upNext.auto);
   else stopAll();
 }
 
@@ -855,6 +857,7 @@ const autoplayOwnsNext = () => !queue.length && (!upNext || upNext.auto);
 
 async function refreshAutoplay() {
   if (!autoplay || !current || !autoplayOwnsNext()) return;
+  if (currentAuto && upNext?.tracks.length) return;
   const seed = current;
   if (radioFor === trackKey(seed)) return;
   radioFor = trackKey(seed);
@@ -1049,7 +1052,7 @@ function playRow(row) {
     case 'queue':
       return playSong(queue.splice(i, 1)[0]);
     case 'next':
-      return playSong(upNext.tracks.splice(0, i + 1).at(-1));
+      return playSong(upNext.tracks.splice(0, i + 1).at(-1), upNext.auto);
     case 'now':
       return undefined;
     default:
