@@ -152,10 +152,12 @@
     </div>
     <div class="transport">
       <div class="keys">
-        <button class="text-key" id="restart" data-i18n="key.restart"></button>
+        <div class="keys-side start"><button class="text-key" id="restart" data-i18n="key.restart"></button></div>
         <button class="play" id="toggle"></button>
-        <button class="text-key" id="skip" data-i18n="key.skip"></button>
-        <button class="text-key" id="repeatToggle"></button>
+        <div class="keys-side">
+          <button class="text-key" id="skip" data-i18n="key.skip"></button>
+          <button class="text-key" id="repeatToggle"></button>
+        </div>
       </div>
       <div class="progress">
         <span id="cur">0:00</span>
