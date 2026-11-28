@@ -7,54 +7,65 @@
 <script type="module" src="js/app.js"></script>
 </head>
 <body>
-<div class="app">
-  <section class="stage">
-    <div class="screen"><div class="video" id="player"></div></div>
-    <div class="band" id="band"></div>
-    <div class="loading-mask" id="kMask" hidden>
-      <div class="spinner"></div>
-      <div class="mask-title" id="kMaskTitle"></div>
-      <div class="mask-bar"><span id="kMaskBar"></span></div>
-      <div class="mask-step" id="kMaskStep"></div>
-      <button class="btn" id="kMaskSkip" data-i18n="karaoke.skipWait"></button>
-    </div>
-  </section>
-
-  <aside class="panel">
-    <nav class="tabs">
-      <button class="tab on" data-tab="pick" data-i18n="tab.pick"></button>
-      <button class="tab" data-tab="queue"><span data-i18n="tab.queue"></span><span class="count" id="qcount">0</span></button>
-      <button class="tab" data-tab="favorites" data-i18n="tab.favorites"></button>
-      <button class="tab" data-tab="playlists" data-i18n="tab.playlists"></button>
-      <button class="tab" data-tab="history" data-i18n="tab.history"></button>
-      <button class="settings-toggle" id="settingsToggle" data-i18n-label="settings.label"></button>
+<div class="app" id="app" data-view="pick" data-idle>
+  <aside class="side" id="side">
+    <div class="brand"><span class="brand-mark">V</span>Vox</div>
+    <nav class="nav" id="nav">
+      <button data-view="stage" data-i18n="nav.stage"></button>
+      <button data-view="pick" data-i18n="tab.pick"></button>
+      <button data-view="favorites" data-i18n="tab.favorites"></button>
+      <button data-view="history" data-i18n="tab.history"></button>
     </nav>
-    <div class="pane" id="pick">
-      <div class="src-tabs" id="srcTabs">
-        <button class="src-tab on" data-source="ytm">YouTube</button>
-        <button class="src-tab" data-source="spotify">Spotify</button>
+    <div class="side-label" data-i18n="tab.playlists"></div>
+    <div class="side-lists" id="sideLists"></div>
+    <div class="mini-slot"></div>
+    <button class="me" id="settingsToggle"></button>
+  </aside>
+
+  <main class="main" id="main">
+    <section class="view stage" id="stage">
+      <div class="stage-tools">
+        <button class="key small" id="styleToggle" data-i18n="key.style"></button>
+        <button class="key small" id="dlToggle"></button>
       </div>
-      <form class="search" id="searchForm">
-        <input id="q" data-i18n-placeholder="search.placeholder" autocomplete="off">
-        <button class="btn primary" type="submit" data-i18n="search.submit"></button>
-      </form>
-      <div class="hint-bar" id="pickHint" hidden></div>
+      <div class="screen"><div class="video" id="player"></div></div>
+      <div class="band" id="band"></div>
+      <div class="loading-mask" id="kMask" hidden>
+        <div class="spinner"></div>
+        <div class="mask-title" id="kMaskTitle"></div>
+        <div class="mask-bar"><span id="kMaskBar"></span></div>
+        <div class="mask-step" id="kMaskStep"></div>
+        <button class="btn" id="kMaskSkip" data-i18n="karaoke.skipWait"></button>
+      </div>
+      <button class="mini-open" id="miniOpen" data-i18n="stage.open"></button>
+    </section>
+    <section class="view" id="pick">
+      <div class="view-head">
+        <form class="search" id="searchForm">
+          <div class="src-tabs" id="srcTabs">
+            <button class="src-tab" type="button" data-source="ytm"><svg class="brand-icon youtube" viewBox="0 0 24 24"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.87.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81z"/><path class="brand-cut" d="M9.55 15.57V8.43L15.82 12z"/></svg>YouTube</button>
+            <button class="src-tab" type="button" data-source="spotify"><svg class="brand-icon spotify" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12"/><path class="brand-cut" d="M17.52 17.34c-.24.36-.66.48-1.02.24-2.82-1.74-6.36-2.1-10.56-1.14-.42.12-.78-.18-.9-.54-.12-.42.18-.78.54-.9 4.56-1.02 8.52-.6 11.64 1.32.42.18.48.66.3 1.02zm1.44-3.3c-.3.42-.84.6-1.26.3-3.24-1.98-8.16-2.58-11.94-1.38-.48.12-1.02-.12-1.14-.6-.12-.48.12-1.02.6-1.14C9.6 9.9 15 10.56 18.72 12.84c.36.18.54.78.24 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.3c-.6.18-1.2-.18-1.38-.72-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.72 1.62.54.3.72 1.02.42 1.56-.3.42-1.02.6-1.56.3z"/></svg>Spotify</button>
+          </div>
+          <input id="q" data-i18n-placeholder="search.placeholder" autocomplete="off">
+          <button class="btn primary" type="submit" data-i18n="search.submit"></button>
+        </form>
+        <div class="hint-bar" id="pickHint" hidden></div>
+      </div>
       <div class="list" id="results"></div>
-    </div>
-    <div class="pane" id="queue" hidden>
-      <div class="list" id="queued"></div>
-    </div>
-    <div class="pane" id="favorites" hidden>
-      <div class="list" id="favs"></div>
-    </div>
-    <div class="pane" id="playlists" hidden>
-      <div class="src-tabs scope-tabs" id="plScopes"></div>
-      <div class="list" id="plists"></div>
-    </div>
-    <div class="pane" id="history" hidden>
-      <div class="list" id="hist"></div>
-    </div>
+    </section>
+    <section class="view" id="favorites"><div class="list" id="favs"></div></section>
+    <section class="view" id="history"><div class="list" id="hist"></div></section>
+    <section class="view" id="playlist"><div class="list" id="plist"></div></section>
     <div class="toast" id="toast" hidden></div>
+  </main>
+
+  <aside class="queue" id="queuePanel">
+    <div class="q-head"><span data-i18n="tab.queue"></span><span class="count" id="qcount">0</span></div>
+    <button class="auto-card" id="autoplayToggle">
+      <span class="auto-text"><b data-i18n="queue.autoplay"></b><span data-i18n="queue.autoplayHint"></span></span>
+      <span class="switch"></span>
+    </button>
+    <div class="list" id="queued"></div>
   </aside>
 
   <div class="menu" id="menu" hidden></div>
@@ -140,15 +151,9 @@
     </div>
     <div class="transport">
       <div class="keys">
-        <button class="key" id="restart" data-i18n="key.restart"></button>
-        <button class="key main" id="toggle"></button>
-        <button class="key" id="skip" data-i18n="key.skip"></button>
-        <button class="key" id="autoplayToggle" data-i18n="queue.autoplay"></button>
-        <div class="pitch">
-          <button class="key small" id="keyDown" data-i18n="key.down"></button>
-          <span class="pitch-value" id="keyValue"></span>
-          <button class="key small" id="keyUp" data-i18n="key.up"></button>
-        </div>
+        <button class="text-key" id="restart" data-i18n="key.restart"></button>
+        <button class="play" id="toggle"></button>
+        <button class="text-key" id="skip" data-i18n="key.skip"></button>
       </div>
       <div class="progress">
         <span id="cur">0:00</span>
@@ -159,19 +164,25 @@
     <div class="extras">
       <div class="extra-keys">
         <button class="key small" id="kToggle" data-i18n="key.karaoke"></button>
+        <div class="pitch">
+          <button class="key small" id="keyDown" data-i18n="key.down"></button>
+          <span class="pitch-value" id="keyValue"></span>
+          <button class="key small" id="keyUp" data-i18n="key.up"></button>
+        </div>
         <button class="key small" id="fxToggle" data-i18n="key.effects"></button>
-        <button class="key small" id="styleToggle" data-i18n="key.style"></button>
-        <button class="key small" id="dlToggle"></button>
+        <button class="key small" id="queueToggle" data-i18n="tab.queue"></button>
       </div>
-      <div class="volume">
-        <span data-i18n="bar.volume"></span>
-        <input type="range" id="vol" min="0" max="100" value="60">
-        <span class="vol-num" id="volNum">60</span>
-      </div>
-      <div class="volume" id="vocalRow">
-        <span data-i18n="bar.vocal"></span>
-        <input type="range" id="vocal" min="0" max="100" value="0">
-        <span class="vol-num" id="vocalNum">0</span>
+      <div class="sliders">
+        <div class="volume">
+          <span data-i18n="bar.volume"></span>
+          <input type="range" id="vol" min="0" max="100" value="60">
+          <span class="vol-num" id="volNum">60</span>
+        </div>
+        <div class="volume" id="vocalRow">
+          <span data-i18n="bar.vocal"></span>
+          <input type="range" id="vocal" min="0" max="100" value="0">
+          <span class="vol-num" id="vocalNum">0</span>
+        </div>
       </div>
     </div>
   </footer>

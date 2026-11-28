@@ -4,11 +4,11 @@
   "tab.favorites": "收藏",
   "tab.playlists": "歌單",
   "tab.history": "歷史",
+  "nav.stage": "唱歌",
 
   "common.cancel": "取消",
   "common.delete": "刪除",
   "common.clear": "清除",
-  "common.back": "返回",
   "common.loading": "讀取中",
   "count.songs": "{n} 首",
 
@@ -34,16 +34,13 @@
   "action.favorite": "收藏",
   "action.unfavorite": "取消收藏",
   "favorites.empty1": "還沒有收藏",
-  "favorites.empty2": "播放時按下方歌名旁的愛心，或在歌曲的「⋯」選收藏",
+  "favorites.empty2": "播放時按下方歌名旁的愛心，或在歌曲的「更多」選收藏",
 
-  "playlists.local": "本機",
   "playlists.new": "新增歌單",
-  "playlists.empty1": "還沒有歌單",
-  "playlists.empty2": "按下面的「新增歌單」建一個，再從歌曲的「⋯」把歌加進來",
-  "playlists.accountHint": "登入後，帳號裡的歌單會出現在這裡",
+  "playlists.account": "{source} 帳號",
   "playlist.defaultName": "新歌單 {n}",
   "playlist.empty1": "這個歌單還沒有歌",
-  "playlist.empty2": "到「點歌」搜尋，在歌曲的「⋯」選這個歌單",
+  "playlist.empty2": "到「點歌」搜尋，在歌曲的「更多」選這個歌單",
   "playlist.delete": "刪除歌單",
   "accountLists.error": "暫時讀不到此帳號的歌單，請稍後再試",
   "accountLists.empty": "此帳號還沒有歌單",
@@ -51,6 +48,7 @@
   "accountList.empty": "這個歌單沒有能播的歌",
 
   "queue.autoplay": "自動播放",
+  "queue.autoplayHint": "點的歌唱完，接著播相似的歌",
   "queue.upNext": "接下來",
   "queue.autoplayTitle": "自動播放：相似的歌",
   "queue.playingFrom": "接著播：{name}",
@@ -72,7 +70,7 @@
   "confirm.clearHistory": "清除全部 {n} 首播放歷史？收藏和歌單不受影響。",
 
   "np.idleTitle": "還沒有播放",
-  "np.idleHint": "從右邊點一首歌",
+  "np.idleHint": "從左邊的「點歌」點一首歌",
   "np.next": "下一首：{title}",
   "np.nextEmpty": "下一首：還沒有點歌",
   "preview.notice": "沒登入 {source}，只能試聽 30 秒",
@@ -92,7 +90,8 @@
   "bar.volume": "音量",
   "bar.vocal": "人聲",
 
-  "stage.idle": "從右邊的「點歌」搜尋，點一首歌開始",
+  "stage.idle": "從左邊的「點歌」搜尋，點一首歌開始",
+  "stage.open": "回到唱歌",
   "stage.preview": "試聽片段對不上歌詞，登入 {source} 播完整首歌就會顯示",
   "stage.lyricsError": "暫時抓不到歌詞",
   "error.removed": "這支影片已移除或不公開",
@@ -200,6 +199,8 @@
   "switch.on": "開",
 
   "settings.label": "帳號與設定",
+  "me.signedIn": "{sources} 已登入",
+  "me.signedOut": "還沒登入",
   "settings.language": "語言",
   "language.system": "跟隨系統",
   "account.title": "帳號",

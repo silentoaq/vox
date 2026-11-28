@@ -42,12 +42,12 @@ const KEY_SHIFT_KEY = 'keyShift';
 const VOLUME_KEY = 'volume';
 const VOCAL_KEY = 'vocal';
 const SOURCE_KEY = 'searchSource';
-const SCOPE_KEY = 'playlistScope';
-const LOCAL_SCOPE = 'local';
+const QUEUE_KEY = 'queueOpen';
 const ASSUMED_DEVICE_RATE = 48000;
 const FRAME_PITCH_LATENCY_MS = (PITCH_LATENCY_FRAMES / ASSUMED_DEVICE_RATE) * 1000;
-const TABS = ['pick', 'queue', 'favorites', 'playlists', 'history'];
 const POPOVERS = ['fx', 'stylePanel', 'settings'];
+const PLAY_ICON = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
+const PAUSE_ICON = '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4.5" height="14" rx="1"/><rect x="13.5" y="5" width="4.5" height="14" rx="1"/></svg>';
 const HEART =
   '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.5 1.2 4.3 2.4h2c.8-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
 const PERSON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>';
@@ -62,8 +62,7 @@ const sameTrack = (a, b) => a && b && a.source === b.source && a.id === b.id;
 const trackKey = (track) => `${track.source}:${track.id}`;
 
 let searchSource = sourceOf(savedText(SOURCE_KEY) ?? 'ytm');
-let playlistScope = sources.find((source) => source.id === savedText(SCOPE_KEY))?.id ?? LOCAL_SCOPE;
-let tab = 'pick';
+let view = 'pick';
 let results = null;
 const played = new Set();
 let confirmAction = null;
@@ -155,16 +154,16 @@ const labelText = (label) => (label.key ? t(label.key) : label.text);
 
 function rowHtml(track, i, kind) {
   const isNow = sameTrack(track, current);
-  const more = `<button class="btn more" data-act="more" aria-label="${t('row.more')}">⋯</button>`;
-  const remove = `<button class="btn" data-act="remove">${t('row.remove')}</button>`;
+  const more = `<button class="btn reveal" data-act="more">${t('row.more')}</button>`;
+  const remove = `<button class="btn reveal" data-act="remove">${t('row.remove')}</button>`;
   const acts =
     kind === 'queue'
-      ? `<button class="btn" data-act="top">${t('row.top')}</button>${remove}`
+      ? `<button class="btn reveal" data-act="top">${t('row.top')}</button>${remove}`
       : kind === 'next'
         ? remove + more
         : kind === 'now'
-          ? `<span class="tag">${t('row.nowPlaying')}</span>`
-          : `<button class="btn pick" data-act="pick">${t('row.pick')}</button><button class="btn" data-act="insert">${t('row.insert')}</button>${more}`;
+          ? ''
+          : `<button class="btn reveal" data-act="insert">${t('row.insert')}</button>${more}<button class="btn pick" data-act="pick">${t('row.pick')}</button>`;
   const mark = library.isFavorite(track) ? `<span class="mark">${HEART}</span>` : '';
   const badge = track.source === 'spotify' ? 'Spotify' : track.kind === 'video' ? t('badge.video') : '';
   return `<div class="row${isNow && kind !== 'queue' && kind !== 'next' ? ' now' : ''}" data-kind="${kind}" data-i="${i}">
@@ -174,74 +173,69 @@ function rowHtml(track, i, kind) {
     <div class="acts">${acts}</div></div>`;
 }
 
+const pageHeadHtml = (title, sub, acts = '') =>
+  `<div class="page-head"><div class="page-text">${title}<div class="page-sub">${escapeHtml(sub)}</div></div><div class="head-acts">${acts}</div></div>`;
+const pickAllHtml = (from, count) =>
+  `<button class="btn primary" data-act="pickAll" data-from="${from}"${count ? '' : ' disabled'}>${t('list.pickAll')}</button>`;
+
 function favoritesHtml() {
   const favorites = library.favorites();
-  if (!favorites.length) return emptyHtml(t('favorites.empty1'), t('favorites.empty2'));
-  return `<div class="list-head"><span>${songCount(favorites.length)}</span>
-    <button class="btn pick" data-act="pickAll" data-from="favorites">${t('list.pickAll')}</button></div>
-    ${favorites.map((track, i) => rowHtml(track, i, 'fav')).join('')}`;
+  const head = pageHeadHtml(`<h1>${t('tab.favorites')}</h1>`, songCount(favorites.length), pickAllHtml('favorites', favorites.length));
+  if (!favorites.length) return head + emptyHtml(t('favorites.empty1'), t('favorites.empty2'));
+  return head + favorites.map((track, i) => rowHtml(track, i, 'fav')).join('');
 }
 
 function accountListHtml() {
   const { name, state, tracks } = openAccount;
-  const head = `<div class="list-head"><button class="btn" data-act="back">${t('common.back')}</button><span class="list-name">${escapeHtml(name)}</span></div>`;
+  const head = pageHeadHtml(`<h1>${escapeHtml(name)}</h1>`, songCount(tracks.length), pickAllHtml('account', tracks.length));
   if (state === 'loading') return head + emptyHtml(t('common.loading'));
   if (state === 'error') return head + emptyHtml(t('accountList.error'));
-  const rows = tracks.length ? tracks.map((track, i) => rowHtml(track, i, 'alist')).join('') : emptyHtml(t('accountList.empty'));
-  return `${head}<div class="list-head"><span>${songCount(tracks.length)}</span>
-    <button class="btn pick" data-act="pickAll" data-from="account"${tracks.length ? '' : ' disabled'}>${t('list.pickAll')}</button></div>${rows}`;
+  if (!tracks.length) return head + emptyHtml(t('accountList.empty'));
+  return head + tracks.map((track, i) => rowHtml(track, i, 'alist')).join('');
 }
 
-function accountListsHtml(source) {
-  const state = accounts.state(source.id)?.state;
-  if (!state) return emptyHtml(t('account.checking'));
-  if (state !== 'active')
-    return `<div class="empty">${escapeHtml(t(state === 'expired' ? 'account.expired' : 'playlists.accountHint'))}
-      <div class="empty-acts">${loginButtonHtml(source)}</div></div>`;
+function playlistHtml() {
+  if (openAccount) return accountListHtml();
+  if (!openPlaylist) return '';
+  const list = library.playlist(openPlaylist);
+  const head = pageHeadHtml(
+    `<input class="title-input" id="plName" value="${escapeHtml(list.name)}" autocomplete="off">`,
+    songCount(list.tracks.length),
+    `${pickAllHtml('playlist', list.tracks.length)}<button class="btn danger" data-act="deletePlaylist">${t('playlist.delete')}</button>`
+  );
+  if (!list.tracks.length) return head + emptyHtml(t('playlist.empty1'), t('playlist.empty2'));
+  return head + list.tracks.map((track, i) => rowHtml(track, i, 'plist')).join('');
+}
+
+const sideItemHtml = (attrs, on, thumb, name, detail) =>
+  `<button class="side-item${on ? ' on' : ''}" ${attrs}>${coverHtml(thumb)}<span class="side-text"><b>${escapeHtml(name)}</b><span>${escapeHtml(detail)}</span></span></button>`;
+
+function sideAccountHtml(source) {
+  if (!accounts.signedIn(source.id)) return '';
+  const head = `<div class="side-group">${escapeHtml(t('playlists.account', { source: source.name }))}</div>`;
   const entry = accountLists.get(source.id);
-  if (!entry || entry.state === 'loading') return emptyHtml(t('common.loading'));
-  if (entry.state === 'error') return emptyHtml(t('accountLists.error'));
-  if (!entry.lists.length) return emptyHtml(t('accountLists.empty'));
-  return entry.lists
-    .map(
-      (list, i) => `<div class="row card-row" data-act="openAccount" data-source="${source.id}" data-i="${i}">${coverHtml(list.thumb)}
-      <div class="text"><div class="title"><span class="name">${escapeHtml(list.name)}</span></div>
-      <div class="meta"><span>${escapeHtml(list.detail)}</span></div></div></div>`
+  if (!entry || entry.state === 'loading') return `${head}<div class="side-note">${t('common.loading')}</div>`;
+  if (entry.state === 'error') return `${head}<div class="side-note">${t('accountLists.error')}</div>`;
+  if (!entry.lists.length) return `${head}<div class="side-note">${t('accountLists.empty')}</div>`;
+  const openId = openAccount?.source === source.id ? openAccount.id : null;
+  return (
+    head +
+    entry.lists
+      .map((list, i) =>
+        sideItemHtml(`data-act="openAccount" data-source="${source.id}" data-i="${i}"`, view === 'playlist' && list.id === openId, list.thumb, list.name, list.detail)
+      )
+      .join('')
+  );
+}
+
+function sideListsHtml() {
+  const local = library
+    .playlists()
+    .map((list) =>
+      sideItemHtml(`data-act="open" data-id="${list.id}"`, view === 'playlist' && list.id === openPlaylist, list.tracks[0]?.thumb, list.name, songCount(list.tracks.length))
     )
     .join('');
-}
-
-function playlistsHtml() {
-  if (openAccount) return accountListHtml();
-  if (openPlaylist) {
-    const list = library.playlist(openPlaylist);
-    const rows = list.tracks.length
-      ? list.tracks.map((track, i) => rowHtml(track, i, 'plist')).join('')
-      : emptyHtml(t('playlist.empty1'), t('playlist.empty2'));
-    return `<div class="list-head"><button class="btn" data-act="back">${t('common.back')}</button>
-      <input class="name-input" id="plName" value="${escapeHtml(list.name)}" autocomplete="off"></div>
-      <div class="list-head"><span>${songCount(list.tracks.length)}</span><div class="head-acts">
-      <button class="btn pick" data-act="pickAll" data-from="playlist"${list.tracks.length ? '' : ' disabled'}>${t('list.pickAll')}</button>
-      <button class="btn danger" data-act="deletePlaylist">${t('playlist.delete')}</button></div></div>${rows}`;
-  }
-  if (playlistScope !== LOCAL_SCOPE) return accountListsHtml(sourceOf(playlistScope));
-  const lists = library.playlists();
-  const cards = lists.length
-    ? lists
-        .map(
-          (list) => `<div class="row card-row" data-act="open" data-id="${list.id}">${coverHtml(list.tracks[0]?.thumb)}
-      <div class="text"><div class="title"><span class="name">${escapeHtml(list.name)}</span></div>
-      <div class="meta"><span>${songCount(list.tracks.length)}</span></div></div></div>`
-        )
-        .join('')
-    : emptyHtml(t('playlists.empty1'), t('playlists.empty2'));
-  return `${cards}<button class="add-bar" data-act="newPlaylist">${t('playlists.new')}</button>`;
-}
-
-function scopeTabsHtml() {
-  return [{ id: LOCAL_SCOPE, name: t('playlists.local') }, ...sources]
-    .map((scope) => `<button class="src-tab${scope.id === playlistScope ? ' on' : ''}" data-scope="${scope.id}">${scope.name}</button>`)
-    .join('');
+  return `${local}<button class="side-add" data-act="newPlaylist">${t('playlists.new')}</button>${sources.map(sideAccountHtml).join('')}`;
 }
 
 function upNextHtml() {
@@ -259,15 +253,14 @@ function upNextHtml() {
 }
 
 function renderPanel() {
-  document.querySelectorAll('.tab').forEach((el) => el.classList.toggle('on', el.dataset.tab === tab));
-  for (const name of TABS) $(name).hidden = tab !== name;
+  $('app').dataset.view = view;
+  document.querySelectorAll('#nav [data-view]').forEach((el) => el.classList.toggle('on', el.dataset.view === view));
   $('qcount').textContent = queue.length;
-  $('favs').innerHTML = favoritesHtml();
-  $('plScopes').hidden = Boolean(openPlaylist || openAccount);
-  $('plScopes').innerHTML = scopeTabsHtml();
-  $('plists').innerHTML = playlistsHtml();
-
-  if (tab === 'history') $('hist').innerHTML = historyHtml();
+  $('autoplayToggle').classList.toggle('on', autoplay);
+  $('sideLists').innerHTML = sideListsHtml();
+  if (view === 'favorites') $('favs').innerHTML = favoritesHtml();
+  if (view === 'playlist') $('plist').innerHTML = playlistHtml();
+  if (view === 'history') $('hist').innerHTML = historyHtml();
 
   if (!results) $('results').innerHTML = emptyHtml(t('search.empty1'), t('search.empty2'), t('search.empty3'));
   else if (!results.length) $('results').innerHTML = emptyHtml(t('search.none'));
@@ -286,9 +279,20 @@ function dayLabel(at) {
   return new Intl.DateTimeFormat(language.id(), { month: 'long', day: 'numeric', ...year }).format(day);
 }
 
+function setView(next) {
+  if (view === 'playlist' && next !== 'playlist') savePlaylistName();
+  view = next;
+  renderPanel();
+}
+
 function historyHtml() {
   const items = library.history();
-  if (!items.length) return emptyHtml(t('history.empty1'), t('history.empty2'));
+  const head = pageHeadHtml(
+    `<h1>${t('tab.history')}</h1>`,
+    songCount(items.length),
+    items.length ? `<button class="btn danger" data-act="clearHistory">${t('history.clear')}</button>` : ''
+  );
+  if (!items.length) return head + emptyHtml(t('history.empty1'), t('history.empty2'));
   let shownDay = '';
   const rows = items
     .map((track, i) => {
@@ -298,8 +302,7 @@ function historyHtml() {
       return section + rowHtml(track, i, 'hist');
     })
     .join('');
-  return `<div class="list-head"><span>${songCount(items.length)}</span>
-    <button class="btn danger" data-act="clearHistory">${t('history.clear')}</button></div>${rows}`;
+  return head + rows;
 }
 
 function ask(text, okLabel, action) {
@@ -339,9 +342,15 @@ function renderAccount() {
     .filter((account) => account.avatar)
     .map((account) => `<img src="${escapeHtml(account.avatar)}" alt="">`)
     .join('');
-  $('settingsToggle').innerHTML = faces || PERSON;
-  $('settingsToggle').classList.toggle('signed', active.length > 0);
-  $('settingsToggle').classList.toggle('expired', states.some((account) => account?.state === 'expired'));
+  const expired = states.some((account) => account?.state === 'expired');
+  const signedIn = sources.filter((source) => accounts.signedIn(source.id)).map((source) => source.name);
+  const status = expired
+    ? t('account.expired')
+    : signedIn.length
+      ? t('me.signedIn', { sources: new Intl.ListFormat(language.id()).format(signedIn) })
+      : t('me.signedOut');
+  $('settingsToggle').innerHTML = `${faces ? `<span class="me-faces">${faces}</span>` : ''}<span class="me-text"><b>${t('settings.label')}</b><span>${escapeHtml(status)}</span></span>`;
+  $('settingsToggle').classList.toggle('expired', expired);
   $('accountRows').innerHTML = sources.map(accountRowHtml).join('');
   renderLanguagePicker();
   const preview = previewOnly(searchSource.id);
@@ -472,6 +481,7 @@ function checkHold() {
 }
 
 function renderNowPlaying() {
+  $('app').toggleAttribute('data-idle', !current);
   $('npTitle').textContent = current ? current.title : t('np.idleTitle');
   $('npArtist').textContent = current ? current.artist : t('np.idleHint');
   $('npNext').textContent =
@@ -549,11 +559,11 @@ function savePlaylistName() {
 
 function updateKeys() {
   const playing = playback.isPlaying();
-  show('toggle', 'textContent', t(playing ? 'key.pause' : 'key.play'));
+  show('toggle', 'innerHTML', playing ? PAUSE_ICON : PLAY_ICON);
+  $('toggle').setAttribute('aria-label', t(playing ? 'key.pause' : 'key.play'));
   show('toggle', 'disabled', !current);
   show('restart', 'disabled', !current);
   show('skip', 'disabled', !current);
-  $('autoplayToggle').classList.toggle('on', autoplay);
 }
 
 function linkedTrack(text) {
@@ -570,8 +580,7 @@ async function searchSongs(source, text) {
 }
 
 async function doSearch(text) {
-  tab = 'pick';
-  renderPanel();
+  setView('pick');
   $('results').innerHTML = emptyHtml(t('search.searching'));
   const link = linkedTrack(text);
   try {
@@ -681,6 +690,7 @@ function sendClock(ms, playing) {
 }
 
 async function playSong(track, auto = false) {
+  if (!current) view = 'stage';
   current = track;
   currentAuto = auto;
   playError = null;
@@ -1004,9 +1014,11 @@ async function loadAccountLists(source) {
 }
 
 async function openAccountList(source, list) {
-  const opened = { source: source.id, name: list.name, state: 'loading', tracks: [] };
+  const opened = { source: source.id, id: list.id, name: list.name, state: 'loading', tracks: [] };
+  savePlaylistName();
   openAccount = opened;
-  renderPanel();
+  openPlaylist = null;
+  setView('playlist');
   try {
     opened.tracks = await source.playlistTracks(list.id);
     opened.state = 'ready';
@@ -1060,8 +1072,9 @@ function playRow(row) {
   }
 }
 
-const panel = document.querySelector('.panel');
-panel.addEventListener('click', (e) => {
+const lists = [$('side'), $('main'), $('queuePanel')];
+
+function onListAct(e) {
   const target = e.target.closest('[data-act]');
   if (!target) return;
   const row = target.closest('.row[data-kind]');
@@ -1089,23 +1102,21 @@ panel.addEventListener('click', (e) => {
       pickAllFrom(target.dataset.from);
       break;
     case 'open':
+      savePlaylistName();
       openPlaylist = target.dataset.id;
-      renderPanel();
+      openAccount = null;
+      setView('playlist');
       break;
     case 'openAccount': {
       const source = sourceOf(target.dataset.source);
       openAccountList(source, accountLists.get(source.id).lists[Number(target.dataset.i)]);
       break;
     }
-    case 'back':
-      savePlaylistName();
-      openPlaylist = null;
-      openAccount = null;
-      renderPanel();
-      break;
     case 'newPlaylist':
+      savePlaylistName();
       openPlaylist = library.createPlaylist().id;
-      renderPanel();
+      openAccount = null;
+      setView('playlist');
       $('plName').focus();
       $('plName').select();
       break;
@@ -1114,7 +1125,7 @@ panel.addEventListener('click', (e) => {
       ask(t('confirm.deletePlaylist', { name: list.name, n: list.tracks.length }), t('common.delete'), () => {
         library.deletePlaylist(openPlaylist);
         openPlaylist = null;
-        renderPanel();
+        setView('pick');
         toast(t('toast.playlistDeleted'));
       });
       break;
@@ -1132,24 +1143,38 @@ panel.addEventListener('click', (e) => {
     default:
       throw new Error(`不認得的操作：${target.dataset.act}`);
   }
-});
-panel.addEventListener('dblclick', (e) => {
-  const row = e.target.closest('.row[data-kind]');
-  if (row && !e.target.closest('button')) playRow(row);
-});
-panel.addEventListener('input', (e) => {
+}
+
+for (const list of lists) {
+  list.addEventListener('click', onListAct);
+  list.addEventListener('dblclick', (e) => {
+    const row = e.target.closest('.row[data-kind]');
+    if (row && !e.target.closest('button')) playRow(row);
+  });
+}
+$('main').addEventListener('input', (e) => {
   if (e.target.id !== 'plName') return;
   clearTimeout(renameTimer);
-  renameTimer = setTimeout(savePlaylistName, RENAME_DELAY_MS);
+  renameTimer = setTimeout(() => {
+    savePlaylistName();
+    $('sideLists').innerHTML = sideListsHtml();
+  }, RENAME_DELAY_MS);
 });
-panel.addEventListener('focusout', (e) => {
+$('main').addEventListener('focusout', (e) => {
   if (e.target.id === 'plName') savePlaylistName();
 });
-panel.addEventListener('keydown', (e) => {
-  if (e.target.id === 'plName' && (e.key === 'Enter' || e.key === 'Escape')) {
-    savePlaylistName();
-    e.target.blur();
-  }
+$('main').addEventListener('keydown', (e) => {
+  if (e.target.id === 'plName' && (e.key === 'Enter' || e.key === 'Escape')) e.target.blur();
+});
+$('nav').addEventListener('click', (e) => {
+  const button = e.target.closest('[data-view]');
+  if (button) setView(button.dataset.view);
+});
+$('miniOpen').addEventListener('click', () => setView('stage'));
+$('queueToggle').addEventListener('click', () => {
+  const open = $('app').classList.toggle('queue-closed') === false;
+  saveFlag(QUEUE_KEY, open);
+  $('queueToggle').classList.toggle('on', open);
 });
 $('menu').addEventListener('click', (e) => {
   const button = e.target.closest('[data-menu]');
@@ -1189,13 +1214,6 @@ $('confirmOk').addEventListener('click', () => {
   $('confirm').hidden = true;
   confirmAction();
 });
-document.querySelectorAll('.tab').forEach((el) =>
-  el.addEventListener('click', () => {
-    tab = el.dataset.tab;
-    renderPanel();
-    if (tab === 'playlists') sources.forEach(loadAccountLists);
-  })
-);
 $('searchForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const text = $('q').value.trim();
@@ -1204,14 +1222,6 @@ $('searchForm').addEventListener('submit', (e) => {
     results = null;
     renderPanel();
   }
-});
-$('plScopes').addEventListener('click', (e) => {
-  const button = e.target.closest('[data-scope]');
-  if (!button || button.classList.contains('on')) return;
-  playlistScope = button.dataset.scope;
-  saveText(SCOPE_KEY, playlistScope);
-  $('plists').scrollTop = 0;
-  renderPanel();
 });
 $('srcTabs').addEventListener('click', (e) => {
   const button = e.target.closest('[data-source]');
@@ -1488,8 +1498,7 @@ function setKaraoke(on) {
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.key.toLowerCase() === 'f') {
     e.preventDefault();
-    tab = 'pick';
-    renderPanel();
+    setView('pick');
     $('q').focus();
     $('q').select();
     return;
@@ -1621,6 +1630,9 @@ setRange($('vol'), Number($('vol').value), 100);
 karaoke.setVolume(Number($('vol').value) / 100);
 applyVocal(Number(savedText(VOCAL_KEY) ?? $('vocal').value));
 document.querySelectorAll('#srcTabs .src-tab').forEach((el) => el.classList.toggle('on', el.dataset.source === searchSource.id));
+const queueOpen = savedFlag(QUEUE_KEY, true);
+$('app').classList.toggle('queue-closed', !queueOpen);
+$('queueToggle').classList.toggle('on', queueOpen);
 renderAccount();
 renderNowPlaying();
 renderPanel();
@@ -1628,7 +1640,10 @@ announceSong();
 frame();
 renderEffects();
 accounts.onChange((sourceId) => {
-  if (openAccount?.source === sourceId && !accounts.signedIn(sourceId)) openAccount = null;
+  if (openAccount?.source === sourceId && !accounts.signedIn(sourceId)) {
+    openAccount = null;
+    if (view === 'playlist' && !openPlaylist) view = 'pick';
+  }
   renderAccount();
   renderPanel();
   renderNowPlaying();

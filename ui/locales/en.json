@@ -4,11 +4,11 @@
   "tab.favorites": "Favorites",
   "tab.playlists": "Playlists",
   "tab.history": "History",
+  "nav.stage": "Sing",
 
   "common.cancel": "Cancel",
   "common.delete": "Delete",
   "common.clear": "Clear",
-  "common.back": "Back",
   "common.loading": "Loading",
   "count.songs": { "one": "{n} song", "other": "{n} songs" },
 
@@ -34,16 +34,13 @@
   "action.favorite": "Favorite",
   "action.unfavorite": "Unfavorite",
   "favorites.empty1": "No favorites yet",
-  "favorites.empty2": "Press the heart next to the song title below, or choose Favorite in a song's ⋯ menu",
+  "favorites.empty2": "Press the heart next to the song title below, or choose Favorite in a song's More menu",
 
-  "playlists.local": "Local",
   "playlists.new": "New playlist",
-  "playlists.empty1": "No playlists yet",
-  "playlists.empty2": "Press New playlist below, then add songs from their ⋯ menu",
-  "playlists.accountHint": "Sign in to see your account's playlists here",
+  "playlists.account": "{source} account",
   "playlist.defaultName": "New playlist {n}",
   "playlist.empty1": "This playlist is empty",
-  "playlist.empty2": "Search for a song, then choose this playlist in its ⋯ menu",
+  "playlist.empty2": "Search for a song, then choose this playlist in its More menu",
   "playlist.delete": "Delete playlist",
   "accountLists.error": "Can't load this account's playlists right now. Try again later.",
   "accountLists.empty": "This account has no playlists yet",
@@ -51,6 +48,7 @@
   "accountList.empty": "No playable songs in this playlist",
 
   "queue.autoplay": "Autoplay",
+  "queue.autoplayHint": "Similar songs play after your queue ends",
   "queue.upNext": "Up next",
   "queue.autoplayTitle": "Autoplay: similar songs",
   "queue.playingFrom": "Next from: {name}",
@@ -78,7 +76,7 @@
   },
 
   "np.idleTitle": "Nothing playing",
-  "np.idleHint": "Add a song from the right",
+  "np.idleHint": "Search on the left and add a song",
   "np.next": "Next: {title}",
   "np.nextEmpty": "Next: nothing queued",
   "preview.notice": "Not signed in to {source}: 30-second previews only",
@@ -98,7 +96,8 @@
   "bar.volume": "Volume",
   "bar.vocal": "Vocals",
 
-  "stage.idle": "Search on the right and add a song to start",
+  "stage.idle": "Search on the left and add a song to start",
+  "stage.open": "Back to singing",
   "stage.preview": "Previews can't sync lyrics. Sign in to {source} to play full songs with lyrics.",
   "stage.lyricsError": "Can't get lyrics right now",
   "error.removed": "This video was removed or is private",
@@ -206,6 +205,8 @@
   "switch.on": "On",
 
   "settings.label": "Accounts and settings",
+  "me.signedIn": "Signed in to {sources}",
+  "me.signedOut": "Not signed in",
   "settings.language": "Language",
   "language.system": "System",
   "account.title": "Accounts",

@@ -4,11 +4,11 @@
   "tab.favorites": "收藏",
   "tab.playlists": "歌单",
   "tab.history": "历史",
+  "nav.stage": "唱歌",
 
   "common.cancel": "取消",
   "common.delete": "删除",
   "common.clear": "清空",
-  "common.back": "返回",
   "common.loading": "加载中",
   "count.songs": "{n} 首",
 
@@ -34,16 +34,13 @@
   "action.favorite": "收藏",
   "action.unfavorite": "取消收藏",
   "favorites.empty1": "还没有收藏",
-  "favorites.empty2": "播放时点击下方歌名旁的爱心，或在歌曲的“⋯”菜单里选择收藏",
+  "favorites.empty2": "播放时点击下方歌名旁的爱心，或在歌曲的“更多”菜单里选择收藏",
 
-  "playlists.local": "本地",
   "playlists.new": "新建歌单",
-  "playlists.empty1": "还没有歌单",
-  "playlists.empty2": "点击下面的“新建歌单”创建一个，再从歌曲的“⋯”菜单把歌加进来",
-  "playlists.accountHint": "登录后，账号里的歌单会显示在这里",
+  "playlists.account": "{source} 账号",
   "playlist.defaultName": "新歌单 {n}",
   "playlist.empty1": "这个歌单还没有歌",
-  "playlist.empty2": "到“点歌”搜索，在歌曲的“⋯”菜单里选择这个歌单",
+  "playlist.empty2": "到“点歌”搜索，在歌曲的“更多”菜单里选择这个歌单",
   "playlist.delete": "删除歌单",
   "accountLists.error": "暂时无法读取此账号的歌单，请稍后再试",
   "accountLists.empty": "此账号还没有歌单",
@@ -51,6 +48,7 @@
   "accountList.empty": "这个歌单里没有可以播放的歌",
 
   "queue.autoplay": "自动播放",
+  "queue.autoplayHint": "点的歌唱完后，继续播放相似的歌",
   "queue.upNext": "接下来",
   "queue.autoplayTitle": "自动播放：相似的歌",
   "queue.playingFrom": "接着播：{name}",
@@ -72,7 +70,7 @@
   "confirm.clearHistory": "清空全部 {n} 条播放历史？收藏和歌单不受影响。",
 
   "np.idleTitle": "还没有播放",
-  "np.idleHint": "从右侧点一首歌",
+  "np.idleHint": "在左侧的“点歌”点一首歌",
   "np.next": "下一首：{title}",
   "np.nextEmpty": "下一首：还没有点歌",
   "preview.notice": "未登录 {source}，只能试听 30 秒",
@@ -92,7 +90,8 @@
   "bar.volume": "音量",
   "bar.vocal": "人声",
 
-  "stage.idle": "在右侧的“点歌”里搜索，点一首歌开始",
+  "stage.idle": "在左侧的“点歌”里搜索，点一首歌开始",
+  "stage.open": "回到唱歌",
   "stage.preview": "试听片段无法对上歌词，登录 {source} 播放完整歌曲后就会显示",
   "stage.lyricsError": "暂时无法获取歌词",
   "error.removed": "该视频已删除或不公开",
@@ -200,6 +199,8 @@
   "switch.on": "开",
 
   "settings.label": "账号与设置",
+  "me.signedIn": "{sources} 已登录",
+  "me.signedOut": "尚未登录",
   "settings.language": "语言",
   "language.system": "跟随系统",
   "account.title": "账号",
