@@ -77,6 +77,6 @@ add_custom_command(TARGET ${APP_ID} POST_BUILD
           -DORT=deps/onnxruntime -P "${CMAKE_SOURCE_DIR}/scripts/notices.cmake"
   COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${APP_ID}-separate>" "${BUNDLE_CONTENTS}/MacOS/${APP_ID}-separate"
   COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_CONTENTS}/Frameworks"
-  COMMAND ${CMAKE_COMMAND} -E copy "${ORT_NATIVE}/libonnxruntime.dylib" "${BUNDLE_CONTENTS}/Frameworks/libonnxruntime.dylib"
+  COMMAND ${CMAKE_COMMAND} -E copy "${ORT_NATIVE}/libonnxruntime.dylib" "${BUNDLE_CONTENTS}/Frameworks/libonnxruntime.1.dylib"
   COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:${APP_ID}>"
 )
