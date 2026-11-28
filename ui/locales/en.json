@@ -49,7 +49,6 @@
   "accountList.empty": "No playable songs in this playlist",
 
   "queue.autoplay": "Autoplay",
-  "queue.autoplayHint": "Similar songs play after your queue ends",
   "queue.upNext": "Up next",
   "queue.autoplayTitle": "Autoplay",
   "queue.playingFrom": "Next from: {name}",
