@@ -243,7 +243,7 @@ void MainWindow::registerMethods() {
   bridge_->on(@"language.get", [this](NSDictionary*) -> id { return languageState(); });
   bridge_->on(@"language.set", [this](NSDictionary* params) -> id {
     NSString* setting = field<NSString>(params, @"setting");
-    if (!chooseLanguage(wide(setting))) throw HostError([@"沒有這個語言：" stringByAppendingString:setting]);
+    if (!chooseLanguage(toWide(setting))) throw HostError([@"沒有這個語言：" stringByAppendingString:setting]);
     lyrics_->languageChanged();
     return languageState();
   });
@@ -402,12 +402,12 @@ void MainWindow::createWebView() {
   try {
     script = frameScript();
   } catch (const std::exception& e) {
-    fatal(ns(tr(Text::StartFailedReason, {APP_NAME, wide(ns(std::string(e.what())))})));
+    fatal(ns(tr(Text::StartFailedReason, {APP_NAME, toWide(ns(std::string(e.what())))})));
     return;
   }
   server_ = std::make_unique<Server>([resourcesDir() stringByAppendingPathComponent:@"ui"], Karaoke::stemsDir());
   if (NSString* failure = server_->start()) {
-    fatal(ns(tr(Text::StartFailedReason, {APP_NAME, wide(failure)})));
+    fatal(ns(tr(Text::StartFailedReason, {APP_NAME, toWide(failure)})));
     return;
   }
 

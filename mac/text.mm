@@ -41,7 +41,7 @@ struct State {
 State& state() {
   static State current = [] {
     NSString* saved = readTextFile(settingPath());
-    auto chosen = saved ? langOf(wide(saved)) : std::nullopt;
+    auto chosen = saved ? langOf(toWide(saved)) : std::nullopt;
     return State{chosen.has_value(), chosen.value_or(systemLang())};
   }();
   return current;

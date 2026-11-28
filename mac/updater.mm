@@ -22,6 +22,7 @@ NSString* const kStagedApp = @"new/Vox.app";
 NSString* const kAttemptedFile = @"attempted";
 NSString* const kRejectedFile = @"updateRejected";
 constexpr size_t kBlobHeader = 8;
+constexpr size_t kSignatureBytes = 64;
 constexpr size_t kHashChunk = 1 << 20;
 
 struct Release {
@@ -78,7 +79,34 @@ NSString* fileSha256(NSString* path) {
   return hexOf(digest, sizeof digest);
 }
 
+NSData* derInteger(const uint8_t* bytes, size_t size) {
+  while (size > 1 && bytes[0] == 0) {
+    ++bytes;
+    --size;
+  }
+  NSMutableData* out = [NSMutableData data];
+  const bool pad = bytes[0] & 0x80;
+  const uint8_t header[] = {0x02, uint8_t(size + (pad ? 1 : 0))};
+  [out appendBytes:header length:sizeof header];
+  if (pad) [out appendBytes:"\0" length:1];
+  [out appendBytes:bytes length:size];
+  return out;
+}
+
+NSData* derSignature(NSData* raw) {
+  const size_t half = raw.length / 2;
+  const auto* bytes = static_cast<const uint8_t*>(raw.bytes);
+  NSMutableData* body = [NSMutableData dataWithData:derInteger(bytes, half)];
+  [body appendData:derInteger(bytes + half, half)];
+  NSMutableData* out = [NSMutableData data];
+  const uint8_t header[] = {0x30, uint8_t(body.length)};
+  [out appendBytes:header length:sizeof header];
+  [out appendData:body];
+  return out;
+}
+
 bool signatureValid(NSData* message, NSData* signature) {
+  if (signature.length != kSignatureBytes) return false;
   NSData* blob = [[NSData alloc] initWithBase64EncodedString:@VOX_UPDATE_KEY options:0];
   if (blob.length <= kBlobHeader) return false;
   NSMutableData* point = [NSMutableData dataWithBytes:"\x04" length:1];
@@ -89,8 +117,8 @@ bool signatureValid(NSData* message, NSData* signature) {
   };
   SecKeyRef key = SecKeyCreateWithData((__bridge CFDataRef)point, (__bridge CFDictionaryRef)attributes, nullptr);
   if (!key) return false;
-  const bool valid = SecKeyVerifySignature(key, kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA256, (__bridge CFDataRef)message,
-                                           (__bridge CFDataRef)signature, nullptr);
+  const bool valid = SecKeyVerifySignature(key, kSecKeyAlgorithmECDSASignatureMessageX962SHA256, (__bridge CFDataRef)message,
+                                           (__bridge CFDataRef)derSignature(signature), nullptr);
   CFRelease(key);
   return valid;
 }

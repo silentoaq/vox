@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <spawn.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -23,6 +25,7 @@ NSString* const kYtDlpUrl = @"https://github.com/yt-dlp/yt-dlp/releases/latest/d
 NSString* const kModelFile = @"demucs-hdemucs_mmi-10s.onnx";
 constexpr int kSeparateThreads = 1;
 constexpr int kUrgentThreads = 4;
+constexpr int kBackgroundNice = 10;
 
 bool exists(NSString* path) { return [NSFileManager.defaultManager fileExistsAtPath:path]; }
 
@@ -55,7 +58,6 @@ Child spawn(NSArray<NSString*>* argv, int input, int data) {
   posix_spawn_file_actions_adddup2(&actions, pipeEnds[1], STDERR_FILENO);
   posix_spawnattr_t attributes;
   posix_spawnattr_init(&attributes);
-  posix_spawnattr_set_qos_class_np(&attributes, QOS_CLASS_UTILITY);
   posix_spawnattr_setflags(&attributes, POSIX_SPAWN_CLOEXEC_DEFAULT);
   std::vector<std::string> storage;
   for (NSString* arg in argv) storage.emplace_back(arg.UTF8String);
@@ -71,6 +73,7 @@ Child spawn(NSArray<NSString*>* argv, int input, int data) {
     close(pipeEnds[0]);
     return {};
   }
+  setpriority(PRIO_PROCESS, pid, kBackgroundNice);
   return {pid, pipeEnds[0]};
 }
 

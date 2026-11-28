@@ -3,10 +3,14 @@
 #include <cmath>
 #include <numbers>
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4324)
+#endif
 #include "pocketfft_hdronly.h"
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 namespace {
 

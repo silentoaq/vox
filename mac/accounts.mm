@@ -128,7 +128,7 @@ void Accounts::login(NSString* id) {
                                                  backing:NSBackingStoreBuffered
                                                    defer:NO];
     loginWindow_.releasedWhenClosed = NO;
-    loginWindow_.title = ns(tr(Text::LoginTitle, {wide(loginSite_->name)}));
+    loginWindow_.title = ns(tr(Text::LoginTitle, {toWide(loginSite_->name)}));
     loginWindow_.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
     loginDelegate_ = [[LoginWindowDelegate alloc] init];
     loginDelegate_.accounts = this;

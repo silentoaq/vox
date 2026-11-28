@@ -694,9 +694,9 @@ const DesktopLyrics::Visual& DesktopLyrics::visualFor(int key, NSString* text, c
     CTRunRef run = static_cast<CTRunRef>(CFArrayGetValueAtIndex(runs, r));
     CTFontRef runFont = static_cast<CTFontRef>(CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName));
     const CFIndex count = CTRunGetGlyphCount(run);
-    std::vector<CGGlyph> glyphs(size_t(count));
-    std::vector<CGPoint> positions(size_t(count));
-    std::vector<CFIndex> indices(size_t(count));
+    std::vector<CGGlyph> glyphs(static_cast<size_t>(count));
+    std::vector<CGPoint> positions(static_cast<size_t>(count));
+    std::vector<CFIndex> indices(static_cast<size_t>(count));
     CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs.data());
     CTRunGetPositions(run, CFRangeMake(0, 0), positions.data());
     CTRunGetStringIndices(run, CFRangeMake(0, 0), indices.data());

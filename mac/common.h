@@ -14,7 +14,7 @@ inline NSString* ns(const std::wstring& text) {
 
 inline NSString* ns(const std::string& text) { return [[NSString alloc] initWithBytes:text.data() length:text.size() encoding:NSUTF8StringEncoding]; }
 
-inline std::wstring wide(NSString* text) {
+inline std::wstring toWide(NSString* text) {
   NSData* data = [text dataUsingEncoding:NSUTF32LittleEndianStringEncoding];
   return std::wstring(static_cast<const wchar_t*>(data.bytes), data.length / sizeof(wchar_t));
 }
